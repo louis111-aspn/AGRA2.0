@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>투자차액 관리 – Fiori 와이어프레임</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "72", "72full", Arial, Helvetica, sans-serif; background: #f0f2f5; color: #32363a; font-size: 13px; }
+  
+  /* Page layout */
+  .page { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .doc-title { background: #1f4e79; color: white; padding: 20px 30px; margin-bottom: 30px; border-radius: 4px; }
+  .doc-title h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .doc-title p { font-size: 13px; opacity: 0.8; }
+
+  .screen-section { margin-bottom: 50px; }
+  .screen-label { background: #2e75b6; color: white; padding: 10px 18px; font-size: 15px; font-weight: 700; border-radius: 4px 4px 0 0; display: flex; align-items: center; gap: 10px; }
+  .screen-label .badge { background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .screen-note { background: #fff9e6; border: 1px solid #e6a817; padding: 8px 14px; font-size: 12px; color: #6a4f00; border-radius: 0 0 4px 4px; margin-bottom: 2px; }
+
+  /* Shell */
+  .shell { background: #fff; border: 1px solid #d9d9d9; border-radius: 0 0 4px 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  /* Fiori Shell Header */
+  .fiori-header { background: #1f4e79; height: 44px; display: flex; align-items: center; padding: 0 16px; gap: 16px; }
+  .fiori-header .hamburger { color: white; font-size: 18px; cursor: pointer; }
+  .fiori-header .app-title { color: white; font-size: 15px; font-weight: 600; flex: 1; }
+  .fiori-header .icons { display: flex; gap: 12px; color: white; font-size: 16px; opacity: 0.85; }
+  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: #5aa0d0; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; }
+
+  /* Page Title */
+  .page-header { background: #f7f7f7; border-bottom: 1px solid #d9d9d9; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .page-header h2 { font-size: 16px; font-weight: 600; color: #1f4e79; }
+  .breadcrumb { font-size: 11px; color: #89919a; }
+  .breadcrumb span { color: #0070f2; cursor: pointer; }
+
+  /* Filter Bar */
+  .filter-bar { background: #fafafa; border-bottom: 1px solid #e8e8e8; padding: 12px 16px; }
+  .filter-bar-title { font-size: 12px; font-weight: 700; color: #6a6d70; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+  .filter-group label { font-size: 11px; color: #6a6d70; font-weight: 600; }
+  .filter-group label .req { color: #bb0000; }
+  .filter-input { height: 32px; border: 1px solid #c7c7c7; border-radius: 3px; padding: 0 28px 0 8px; font-size: 13px; color: #32363a; background: white; position: relative; display: flex; align-items: center; cursor: pointer; }
+  .filter-input.filled { background: #f0f7ff; border-color: #2e75b6; }
+  .filter-input .vhIcon { margin-left: auto; color: #89919a; font-size: 14px; }
+  .filter-input.range { min-width: 230px; }
+  .filter-btn-group { display: flex; gap: 8px; margin-left: auto; }
+
+  /* Toolbar */
+  .toolbar { background: white; border-bottom: 1px solid #e8e8e8; padding: 8px 16px; display: flex; align-items: center; gap: 8px; }
+  .btn { height: 32px; padding: 0 14px; border-radius: 3px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; border: 1px solid transparent; }
+  .btn-primary { background: #2e75b6; color: white; border-color: #2e75b6; }
+  .btn-secondary { background: white; color: #32363a; border-color: #bfbfbf; }
+  .btn-ghost { background: transparent; color: #2e75b6; border-color: transparent; }
+  .btn-danger { background: white; color: #bb0000; border-color: #bb0000; }
+  .btn-success { background: #107c10; color: white; border-color: #107c10; }
+  .btn-warn { background: #e6a817; color: white; border-color: #e6a817; }
+  .btn-separator { width: 1px; height: 24px; background: #e0e0e0; margin: 0 4px; }
+  .toolbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .record-count { font-size: 12px; color: #89919a; }
+
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table thead tr { background: #f0f3f7; }
+  .data-table th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 700; color: #32363a; border-bottom: 2px solid #d9d9d9; white-space: nowrap; }
+  .data-table th.num { text-align: right; }
+  .data-table td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; white-space: nowrap; }
+  .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .data-table tbody tr:hover { background: #f0f7ff; }
+  .data-table tbody tr.selected { background: #dbeeff; }
+  .data-table .negative { color: #bb0000; }
+  .data-table .positive { color: #107c10; }
+  .checkbox-cell { width: 36px; text-align: center; }
+  .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .status-input { background: #fff3cd; color: #6a4f00; }
+  .status-agg { background: #d4edda; color: #155724; }
+  .status-req { background: #cce5ff; color: #004085; }
+  .col-sort { color: #89919a; margin-left: 4px; font-size: 10px; }
+
+  /* Object Page */
+  .object-header { background: linear-gradient(135deg, #1f4e79 0%, #2e75b6 100%); padding: 16px 20px; color: white; }
+  .object-header .obj-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .object-header .obj-sub { font-size: 12px; opacity: 0.8; }
+  .object-header .obj-kpis { display: flex; gap: 30px; margin-top: 12px; }
+  .kpi-item { text-align: center; }
+  .kpi-value { font-size: 20px; font-weight: 700; }
+  .kpi-label { font-size: 10px; opacity: 0.75; text-transform: uppercase; }
+  .object-header .obj-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+  .section-tabs { display: flex; border-bottom: 2px solid #2e75b6; background: white; }
+  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; color: #89919a; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+  .tab.active { color: #2e75b6; border-bottom-color: #2e75b6; font-weight: 600; }
+
+  .form-section { padding: 16px 20px; background: white; }
+  .form-section-title { font-size: 13px; font-weight: 700; color: #1f4e79; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; gap: 8px; }
+  .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .form-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; }
+  .form-field label { font-size: 11px; color: #6a6d70; font-weight: 600; }
+  .form-field label .req { color: #bb0000; }
+  .form-field .field-value { height: 32px; border: 1px solid #c7c7c7; border-radius: 3px; padding: 0 10px; background: white; display: flex; align-items: center; font-size: 13px; }
+  .form-field .field-value.readonly { background: #f5f5f5; color: #6a6d70; border-style: dashed; }
+  .form-field .field-value.calculated { background: #fff9e0; color: #32363a; border-color: #e6a817; font-weight: 600; }
+  .form-field .field-value.currency { justify-content: flex-end; }
+  .currency-label { font-size: 10px; color: #89919a; margin-left: 4px; }
+
+  /* BAdI Diagram */
+  .badi-diagram { padding: 20px; background: white; }
+  .flow-container { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .flow-box { background: white; border: 2px solid #2e75b6; border-radius: 6px; padding: 12px 16px; text-align: center; min-width: 120px; }
+  .flow-box.trigger { border-color: #107c10; background: #f0fff0; }
+  .flow-box.process { border-color: #2e75b6; background: #f0f7ff; }
+  .flow-box.decision { border-color: #e6a817; background: #fffaf0; transform: rotate(0deg); }
+  .flow-box.output { border-color: #6f42c1; background: #f8f0ff; }
+  .flow-box .box-title { font-size: 12px; font-weight: 700; color: #1f4e79; }
+  .flow-box .box-sub { font-size: 10px; color: #6a6d70; margin-top: 3px; }
+  .flow-arrow { font-size: 20px; color: #2e75b6; padding: 0 8px; }
+  .flow-label { font-size: 10px; color: #6a6d70; text-align: center; }
+
+  /* Monitor Screen */
+  .monitor-grid { display: grid; grid-template-columns: 220px 1fr; min-height: 320px; }
+  .monitor-nav { background: #f7f7f7; border-right: 1px solid #e8e8e8; padding: 12px 0; }
+  .monitor-nav-item { padding: 10px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #6a6d70; }
+  .monitor-nav-item.active { background: #dbeeff; color: #2e75b6; font-weight: 600; border-left: 3px solid #2e75b6; }
+  .monitor-nav-item .nav-status { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; }
+  .status-green { background: #107c10; }
+  .status-yellow { background: #e6a817; }
+  .status-red { background: #bb0000; }
+  .monitor-content { padding: 16px; }
+  .task-card { border: 1px solid #e8e8e8; border-radius: 4px; padding: 14px; margin-bottom: 12px; background: white; }
+  .task-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .task-id { font-size: 11px; font-weight: 700; color: #89919a; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; }
+  .task-name { font-size: 14px; font-weight: 600; color: #1f4e79; }
+  .task-progress { margin-top: 10px; }
+  .progress-bar { height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #2e75b6, #5aa0d0); border-radius: 3px; }
+  .progress-label { font-size: 11px; color: #6a6d70; margin-top: 4px; }
+
+  /* Divider */
+  .section-divider { height: 1px; background: #e8e8e8; margin: 0; }
+
+  .info-box { background: #e8f4ff; border-left: 4px solid #2e75b6; padding: 10px 14px; margin: 12px 16px; font-size: 12px; color: #1f4e79; border-radius: 0 4px 4px 0; }
+  .warn-box { background: #fff3cd; border-left: 4px solid #e6a817; padding: 10px 14px; margin: 12px 16px; font-size: 12px; color: #6a4f00; border-radius: 0 4px 4px 0; }
+
+  /* Legend */
+  .legend { display: flex; gap: 20px; padding: 10px 16px; background: #fafafa; border-top: 1px solid #e8e8e8; font-size: 11px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; color: #6a6d70; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  @media print { body { background: white; } .page { padding: 10px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-title">
+    <h1>S/4HANA Group Reporting – 투자차액 관리 Fiori 와이어프레임</h1>
+    <p>RAP 기반 Fiori Elements 화면 | 연결 모니터 BAdI Z3000 | 설계 참고용 초안 (V1.0)</p>
+  </div>
+
+  <!-- ===== SCREEN 1: 투자차액 내역관리 LIST ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      화면 1 – 투자차액 내역관리
+      <span class="badge">Fiori Elements · List Report</span>
+    </div>
+    <div class="screen-note">📌 검색 조건: 버전*, 연결그룹* 필수 입력 | CRUD 지원 (신규/편집/삭제/저장) | RAP Draft 기반</div>
+    <div class="shell">
+      <!-- Fiori Shell -->
+      <div class="fiori-header">
+        <span class="hamburger">☰</span>
+        <span class="app-title">투자차액 내역관리</span>
+        <div class="icons">🔔 ⚙️ <div class="user-avatar">UR</div></div>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span>Home</span> › <span>Group Reporting</span> › 투자차액 내역관리</div>
+          <h2>투자차액 내역관리</h2>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-bar-title">🔍 검색 조건 <span style="color:#bb0000;font-size:10px">* 필수 항목</span></div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>버전 <span class="req">*</span></label>
+            <div class="filter-input filled">V1 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>연결그룹 <span class="req">*</span></label>
+            <div class="filter-input filled">CG_A0 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>투자법인</label>
+            <div class="filter-input">A100 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>피투자법인</label>
+            <div class="filter-input">A200 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>적용연월 (범위)</label>
+            <div class="filter-input range">2025.001 ~ 2025.012 <span class="vhIcon">📅</span></div>
+          </div>
+          <div class="filter-btn-group">
+            <button class="btn btn-primary">🔍 조회</button>
+            <button class="btn btn-secondary">↺ 초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="btn btn-secondary">✚ 신규</button>
+        <button class="btn btn-secondary">✎ 편집</button>
+        <div class="btn-separator"></div>
+        <button class="btn btn-danger">🗑 삭제</button>
+        <div class="toolbar-right">
+          <span class="record-count">2건 조회됨</span>
+          <button class="btn btn-success">💾 저장</button>
+          <button class="btn btn-ghost">⬇ Excel</button>
+          <button class="btn btn-ghost">⚙ 컬럼 설정</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="checkbox-cell"><input type="checkbox"></th>
+              <th>버전 <span class="col-sort">▲</span></th>
+              <th>연결그룹</th>
+              <th>투자법인</th>
+              <th>피투자법인</th>
+              <th>적용연월 <span class="col-sort">▲</span></th>
+              <th>변동일자</th>
+              <th>하위항목</th>
+              <th>조정FS항목</th>
+              <th>소거FS항목</th>
+              <th>환산FS항목</th>
+              <th>변동전지분</th>
+              <th>변동후지분</th>
+              <th>LC</th>
+              <th class="num">투자금액(LC)</th>
+              <th class="num">투자금액(TC)</th>
+              <th class="num">투자금액(GC)</th>
+              <th class="num">투자차액(LC)</th>
+              <th class="num">투자차액(TC)</th>
+              <th class="num">투자차액(GC)</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td class="checkbox-cell"><input type="checkbox" checked></td>
+              <td>V1</td>
+              <td>CG_A0</td>
+              <td>A100</td>
+              <td>A200</td>
+              <td><strong>2025.003</strong></td>
+              <td>2025-01-01</td>
+              <td>901</td>
+              <td>163100</td>
+              <td>316000</td>
+              <td>314800</td>
+              <td>0%</td>
+              <td>100%</td>
+              <td>USD</td>
+              <td class="num">71,428.57</td>
+              <td class="num">100,000,000</td>
+              <td class="num">100,000,000</td>
+              <td class="num positive">14,285.71</td>
+              <td class="num positive">20,000,000</td>
+              <td class="num positive">20,000,000</td>
+              <td>–</td>
+            </tr>
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>V1</td>
+              <td>CG_A0</td>
+              <td>A100</td>
+              <td>A200</td>
+              <td><strong>2025.006</strong></td>
+              <td>2025-06-01</td>
+              <td>940</td>
+              <td>320060</td>
+              <td>316000</td>
+              <td>314800</td>
+              <td>100%</td>
+              <td>100%</td>
+              <td>USD</td>
+              <td class="num">35,714.29</td>
+              <td class="num">50,000,000</td>
+              <td class="num">50,000,000</td>
+              <td class="num negative">-7,142.86</td>
+              <td class="num negative">-10,000,000</td>
+              <td class="num negative">-10,000,000</td>
+              <td>–</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#dbeeff"></div> 선택된 행</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#107c10"></div> 투자차액 양수</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#bb0000"></div> 투자차액 음수 (부의영업권)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 1b: Object Page (신규/편집) ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      화면 1 (Object Page) – 투자차액 내역 입력/편집
+      <span class="badge">Fiori Elements · Object Page</span>
+    </div>
+    <div class="screen-note">📌 신규 또는 편집 버튼 클릭 시 이동 | Draft 모드 지원 | 투자차액 자동 계산 (Determination)</div>
+    <div class="shell">
+      <div class="fiori-header">
+        <span class="hamburger">☰</span>
+        <span class="app-title">투자차액 내역관리 › 신규 입력</span>
+        <div class="icons">🔔 ⚙️ <div class="user-avatar">UR</div></div>
+      </div>
+      <!-- Object Header -->
+      <div class="object-header">
+        <div class="obj-title">투자차액 내역 – 신규 [Draft]</div>
+        <div class="obj-sub">V1 | CG_A0 | A100 → A200 | 2025.003</div>
+        <div class="obj-kpis">
+          <div class="kpi-item"><div class="kpi-value">20,000,000</div><div class="kpi-label">투자차액 (GC)</div></div>
+          <div class="kpi-item"><div class="kpi-value">14,285.71</div><div class="kpi-label">투자차액 (LC)</div></div>
+          <div class="kpi-item"><div class="kpi-value">100%</div><div class="kpi-label">변동후 지분율</div></div>
+        </div>
+        <div class="obj-actions">
+          <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border-color:rgba(255,255,255,0.4)">✎ 편집 모드</button>
+          <button class="btn" style="background:#107c10;color:white;border-color:#107c10">💾 저장</button>
+          <button class="btn" style="background:rgba(255,255,255,0.1);color:white;border-color:rgba(255,255,255,0.3)">✕ 취소</button>
+        </div>
+      </div>
+
+      <!-- Section Tabs -->
+      <div class="section-tabs">
+        <div class="tab active">📋 기본 정보</div>
+        <div class="tab">📊 지분 정보</div>
+        <div class="tab">💰 금액 정보 (3통화)</div>
+        <div class="tab">📎 첨부</div>
+      </div>
+
+      <!-- Form: 기본정보 -->
+      <div class="form-section">
+        <div class="form-section-title">🔷 식별 정보 (Primary Key)</div>
+        <div class="form-grid">
+          <div class="form-field"><label>버전 <span class="req">*</span></label><div class="filter-input filled">V1 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>연결그룹 <span class="req">*</span></label><div class="filter-input filled">CG_A0 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>투자법인 <span class="req">*</span></label><div class="filter-input">A100 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>피투자법인 <span class="req">*</span></label><div class="filter-input">A200 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>적용연월 <span class="req">*</span></label><div class="filter-input">2025.003 <span class="vhIcon">📅</span></div></div>
+          <div class="form-field"><label>변동일자 <span class="req">*</span></label><div class="filter-input">2025-01-01 <span class="vhIcon">📅</span></div></div>
+          <div class="form-field"><label>하위항목 <span class="req">*</span></label><div class="filter-input">901 <span class="vhIcon">⊞</span></div></div>
+        </div>
+        <br>
+        <div class="form-section-title">🔷 FS 항목</div>
+        <div class="form-grid">
+          <div class="form-field"><label>조정FS항목</label><div class="filter-input">163100 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>소거FS항목</label><div class="filter-input">316000 <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>환산FS항목</label><div class="filter-input">314800 <span class="vhIcon">⊞</span></div></div>
+        </div>
+      </div>
+      <div class="section-divider"></div>
+
+      <!-- Form: 금액정보 -->
+      <div class="form-section">
+        <div class="form-section-title">💰 지분 및 통화 정보</div>
+        <div class="form-grid">
+          <div class="form-field"><label>변동전지분율</label><div class="field-value">0.00 %</div></div>
+          <div class="form-field"><label>변동후지분율</label><div class="field-value">100.00 %</div></div>
+          <div class="form-field"><label>LC (현지통화)</label><div class="filter-input">USD <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>TC (거래통화)</label><div class="filter-input">KRW <span class="vhIcon">⊞</span></div></div>
+          <div class="form-field"><label>GC (그룹통화)</label><div class="filter-input">KRW <span class="vhIcon">⊞</span></div></div>
+        </div>
+        <br>
+        <div class="form-section-title">💰 금액 입력 (LC / TC / GC)</div>
+        <div style="overflow-x:auto">
+          <table class="data-table" style="min-width:700px">
+            <thead>
+              <tr>
+                <th>항목</th>
+                <th class="num">현지통화 (LC/USD)</th>
+                <th class="num">거래통화 (TC/KRW)</th>
+                <th class="num">그룹통화 (GC/KRW)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>투자금액</td><td class="num"><input style="width:120px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="71,428.57"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="100,000,000"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="100,000,000"></td></tr>
+              <tr style="background:#f9f9f9"><td>변동전자본</td><td class="num"><input style="width:120px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="0"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="0"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="0"></td></tr>
+              <tr><td>변동후자본</td><td class="num"><input style="width:120px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="85,714.29"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="120,000,000"></td><td class="num"><input style="width:140px;text-align:right;border:1px solid #c7c7c7;padding:4px;border-radius:3px" value="120,000,000"></td></tr>
+              <tr style="background:#f9f9f9"><td>지분변동</td><td class="num field-value readonly" style="height:auto;padding:4px">85,714.29</td><td class="num field-value readonly" style="height:auto;padding:4px">120,000,000</td><td class="num field-value readonly" style="height:auto;padding:4px">120,000,000</td></tr>
+              <tr style="background:#fff9e0"><td><strong>투자차액 (자동계산)</strong> 🔒</td><td class="num field-value calculated" style="height:auto;padding:4px">14,285.71</td><td class="num field-value calculated" style="height:auto;padding:4px">20,000,000</td><td class="num field-value calculated positive" style="height:auto;padding:4px">20,000,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-box">💡 투자차액은 투자금액 – (변동후자본 × 변동후지분율)로 자동 계산됩니다 (RAP Determination). 수동 입력 불가.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2: 투자차액 분개관리 LIST ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      화면 2 – 투자차액 분개관리
+      <span class="badge">Fiori Elements · List Report</span>
+    </div>
+    <div class="screen-note">📌 전기기간* 추가 필수 | 집계/승인요청 액션 | 환산조정(GC) 자동 계산 | 전표번호 생성 후 표시</div>
+    <div class="shell">
+      <div class="fiori-header">
+        <span class="hamburger">☰</span>
+        <span class="app-title">투자차액 분개관리</span>
+        <div class="icons">🔔 ⚙️ <div class="user-avatar">UR</div></div>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span>Home</span> › <span>Group Reporting</span> › 투자차액 분개관리</div>
+          <h2>투자차액 분개관리</h2>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-bar-title">🔍 검색 조건 <span style="color:#bb0000;font-size:10px">* 필수 항목</span></div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>버전 <span class="req">*</span></label>
+            <div class="filter-input filled">V1 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>전기기간 <span class="req">*</span> <span style="color:#e6a817;font-size:10px">▶ 기말환율 자동조회</span></label>
+            <div class="filter-input filled">2025.006 <span class="vhIcon">📅</span></div>
+          </div>
+          <div class="filter-group">
+            <label>연결그룹 <span class="req">*</span></label>
+            <div class="filter-input filled">CG_A0 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>투자법인</label>
+            <div class="filter-input">A100 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-group">
+            <label>피투자법인</label>
+            <div class="filter-input">A200 <span class="vhIcon">⊞</span></div>
+          </div>
+          <div class="filter-btn-group">
+            <button class="btn btn-primary">🔍 조회</button>
+            <button class="btn btn-secondary">↺ 초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">📐 적용환율 (전기기간 기말환율): <strong>1 USD = 1,450 KRW</strong> &nbsp;|&nbsp; 자동 조회됨</div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="btn btn-success">📊 집계</button>
+        <button class="btn btn-warn">✅ 승인요청</button>
+        <div class="btn-separator"></div>
+        <span class="record-count">2건 조회됨</span>
+        <div class="toolbar-right">
+          <button class="btn btn-ghost">⬇ Excel</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="checkbox-cell"><input type="checkbox"></th>
+              <th>버전</th>
+              <th>전기기간</th>
+              <th>연결그룹</th>
+              <th>투자법인</th>
+              <th>피투자법인</th>
+              <th>적용연월</th>
+              <th>하위항목</th>
+              <th>적용환율</th>
+              <th class="num">투자차액(LC)</th>
+              <th class="num">투자차액(GC)</th>
+              <th class="num">환산조정(GC) 🔒</th>
+              <th>상태</th>
+              <th>전표번호</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td class="checkbox-cell"><input type="checkbox" checked></td>
+              <td>V1</td>
+              <td>2025.006</td>
+              <td>CG_A0</td>
+              <td>A100</td>
+              <td>A200</td>
+              <td>2025.003</td>
+              <td>901</td>
+              <td class="num">1,450.00</td>
+              <td class="num positive">14,285.71</td>
+              <td class="num positive">20,000,000</td>
+              <td class="num positive" style="background:#fff9e0">714,285.71</td>
+              <td><span class="status-badge status-agg">집계완료</span></td>
+              <td>30000001</td>
+            </tr>
+            <tr>
+              <td class="checkbox-cell"><input type="checkbox"></td>
+              <td>V1</td>
+              <td>2025.006</td>
+              <td>CG_A0</td>
+              <td>A100</td>
+              <td>A200</td>
+              <td>2025.006</td>
+              <td>940</td>
+              <td class="num">1,450.00</td>
+              <td class="num negative">-7,142.86</td>
+              <td class="num negative">-10,000,000</td>
+              <td class="num negative" style="background:#fff9e0">-357,142.86</td>
+              <td><span class="status-badge status-req">승인요청</span></td>
+              <td>30000002</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-box">⚠️ 부의 영업권 (FS항목: 510750 / S-P-BARGAIN-PUR): 전기기간과 적용연월의 <strong>연도가 다를 경우</strong> 환산조정 분개 집계 대상에서 자동 제외됩니다.</div>
+      <div class="legend">
+        <div class="legend-item"><span class="status-badge status-input">입력</span> 데이터 입력 완료</div>
+        <div class="legend-item"><span class="status-badge status-agg">집계완료</span> 집계 버튼 실행 후</div>
+        <div class="legend-item"><span class="status-badge status-req">승인요청</span> BAdI 실행 대상 (Z3000)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 3: 분개생성 상세 (BAdI 결과) ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      화면 3 – 투자차액 분개생성 결과 (연결 모니터 Z3000 실행 후)
+      <span class="badge">BAdI 결과 조회</span>
+    </div>
+    <div class="screen-note">📌 연결 모니터 Z3000 태스크 실행 후 생성된 조정 전표(3Z) 내역 표시 | 전표유형 3Z, 4행 구조</div>
+    <div class="shell">
+      <div class="fiori-header">
+        <span class="hamburger">☰</span>
+        <span class="app-title">투자차액 분개생성 결과</span>
+        <div class="icons">🔔 ⚙️ <div class="user-avatar">UR</div></div>
+      </div>
+      <div class="page-header">
+        <h2>분개생성 결과 – 전표번호: 30000001 (전표유형: 3Z)</h2>
+      </div>
+      <div class="info-box">✅ BAdI Z3000 실행 완료 | 전기기간(2025.006) = 적용연월(2025.003) → <strong>최초 조정분개 + 환산조정분개 생성</strong></div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>행#</th>
+              <th>버전</th>
+              <th>전기기간</th>
+              <th>연결그룹</th>
+              <th>투자법인</th>
+              <th>피투자법인</th>
+              <th>하위항목</th>
+              <th>조정FS</th>
+              <th>소거FS</th>
+              <th>환산FS</th>
+              <th>분개FS항목</th>
+              <th class="num">투자차액(GC)</th>
+              <th class="num">환산조정(GC)</th>
+              <th class="num">그룹통화금액</th>
+              <th>전표번호</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f0fff0">
+              <td>1</td><td>V1</td><td>2025.006</td><td>CG_A0</td><td>A100</td><td>A200</td><td>901</td><td>163100</td><td>172100</td><td>314800</td><td><strong>163100 (조정)</strong></td><td class="num">20,000,000</td><td class="num">714,285.71</td><td class="num negative">-20,000,000</td><td>30000001</td>
+            </tr>
+            <tr style="background:#f0fff0">
+              <td>2</td><td>V1</td><td>2025.006</td><td>CG_A0</td><td>A100</td><td>A200</td><td>901</td><td>163100</td><td>172100</td><td>314800</td><td><strong>172100 (소거)</strong></td><td class="num">20,000,000</td><td class="num">714,285.71</td><td class="num positive">20,000,000</td><td>30000001</td>
+            </tr>
+            <tr style="background:#fffbf0">
+              <td>3</td><td>V1</td><td>2025.006</td><td>CG_A0</td><td>A100</td><td>A200</td><td>901</td><td>163100</td><td>172100</td><td>314800</td><td><strong>314800 (환산)</strong></td><td class="num">20,000,000</td><td class="num">714,285.71</td><td class="num negative">-714,285.71</td><td>30000001</td>
+            </tr>
+            <tr style="background:#fffbf0">
+              <td>4</td><td>V1</td><td>2025.006</td><td>CG_A0</td><td>A100</td><td>A200</td><td>901</td><td>163100</td><td>172100</td><td>314800</td><td><strong>172100 (소거)</strong></td><td class="num">20,000,000</td><td class="num">714,285.71</td><td class="num positive">714,285.71</td><td>30000001</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#f0fff0"></div> 최초 조정 분개 행 (1~2행)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fffbf0"></div> 환산 조정 분개 행 (3~4행)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 4: 연결 모니터 ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      화면 4 – 연결 모니터 (BAdI Z3000 태스크)
+      <span class="badge">Group Reporting · Consolidation Monitor</span>
+    </div>
+    <div class="screen-note">📌 연결 모니터의 Z3000 태스크에서 투자차액 분개생성 BAdI 실행 | 승인요청 상태 데이터를 대상으로 ACDOCC 전표 자동 생성</div>
+    <div class="shell">
+      <div class="fiori-header">
+        <span class="hamburger">☰</span>
+        <span class="app-title">Consolidation Monitor</span>
+        <div class="icons">🔔 ⚙️ <div class="user-avatar">UR</div></div>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span>Home</span> › <span>Group Reporting</span> › Consolidation Monitor</div>
+          <h2>Consolidation Monitor – CG_A0 | 2025.006</h2>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary">⚙ 설정</button>
+          <button class="btn btn-primary">▶ 전체 실행</button>
+        </div>
+      </div>
+      <div class="monitor-grid">
+        <div class="monitor-nav">
+          <div style="padding:8px 16px;font-size:11px;font-weight:700;color:#6a6d70;text-transform:uppercase">태스크 목록</div>
+          <div class="monitor-nav-item">1000 – 데이터 검증 <div class="nav-status status-green"></div></div>
+          <div class="monitor-nav-item">1100 – 통화환산 <div class="nav-status status-green"></div></div>
+          <div class="monitor-nav-item">2000 – 내부거래 소거 <div class="nav-status status-yellow"></div></div>
+          <div class="monitor-nav-item active">Z3000 – 투자차액 분개생성 <div class="nav-status status-yellow"></div></div>
+          <div class="monitor-nav-item">3000 – 지분법 처리 <div class="nav-status status-red"></div></div>
+          <div class="monitor-nav-item">9000 – 연결재무제표 <div class="nav-status status-red"></div></div>
+        </div>
+        <div class="monitor-content">
+          <div class="task-card">
+            <div class="task-card-header">
+              <div>
+                <div class="task-id">TASK: Z3000</div>
+                <div class="task-name">투자차액 분개생성 (BAdI: FAGL_FC_CONS)</div>
+              </div>
+              <span class="status-badge status-agg">대기중</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px;color:#6a6d70;margin-bottom:12px">
+              <div>전표유형: <strong style="color:#1f4e79">3Z</strong></div>
+              <div>대상건수: <strong style="color:#1f4e79">2건</strong></div>
+              <div>상태: <strong style="color:#e6a817">승인요청</strong></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary">▶ Z3000 실행</button>
+              <button class="btn btn-secondary">📋 로그 보기</button>
+              <button class="btn btn-ghost">🔗 분개관리 이동</button>
+            </div>
+          </div>
+          
+          <div style="padding:12px 0;font-size:12px;font-weight:700;color:#1f4e79">실행 로직 흐름</div>
+          <div class="flow-container" style="gap:6px;flex-direction:column;align-items:flex-start">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="flow-box trigger" style="min-width:200px"><div class="box-title">▶ Z3000 실행 시작</div><div class="box-sub">승인요청 상태 조회</div></div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box process" style="min-width:220px"><div class="box-title">전기기간 vs 적용연월 비교</div><div class="box-sub">분개 유형 결정</div></div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box decision" style="min-width:200px"><div class="box-title">⬦ 부의 영업권?<br>(510750)</div><div class="box-sub">연도 변경 시 제외</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+              <div class="flow-box process" style="min-width:200px"><div class="box-title">환산조정(GC) 계산</div><div class="box-sub">LC × 기말환율 – GC</div></div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box process" style="min-width:220px"><div class="box-title">ACDOCC 전표 생성</div><div class="box-sub">4행 구조 (전표유형 3Z)</div></div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box output" style="min-width:200px"><div class="box-title">✅ 전표번호 업데이트</div><div class="box-sub">ZINV_DIFF_JNL.RDOCNO</div></div>
+            </div>
+          </div>
+          
+          <div class="warn-box" style="margin:12px 0 0 0">⚠️ 부의 영업권(510750 / S-P-BARGAIN-PUR): 전기기간과 적용연월의 <strong>회계연도가 다를 경우</strong> 환산조정 분개 생성 제외</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Architecture Overview ===== -->
+  <div class="screen-section">
+    <div class="screen-label">
+      아키텍처 개요 – RAP Stack & BAdI 연계
+      <span class="badge">참고용</span>
+    </div>
+    <div class="shell">
+      <div style="padding:20px;background:white">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center">
+          <div style="background:#f0f7ff;border:2px solid #2e75b6;border-radius:8px;padding:14px">
+            <div style="font-size:20px">🗄️</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">DB Tables</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">ZINV_DIFF_HDR<br>ZINV_DIFF_JNL</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#2e75b6">→</div>
+          <div style="background:#f0fff0;border:2px solid #107c10;border-radius:8px;padding:14px">
+            <div style="font-size:20px">📐</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">CDS Views</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">Basic + Projection<br>UI Annotations</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;font-size:24px;color:#2e75b6">→</div>
+          <div style="background:#fff0ff;border:2px solid #6f42c1;border-radius:8px;padding:14px">
+            <div style="font-size:20px">⚙️</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">RAP Behavior</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">CRUD + Draft<br>Validation<br>Determination</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;margin-top:12px">
+          <div style="background:#fff9e0;border:2px solid #e6a817;border-radius:8px;padding:14px">
+            <div style="font-size:20px">🌐</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">OData V4 Service</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">ZINV_DIFF_SRV<br>Service Binding</div>
+          </div>
+          <div style="background:#f0f7ff;border:2px solid #2e75b6;border-radius:8px;padding:14px">
+            <div style="font-size:20px">📱</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">Fiori Elements</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">화면1: 내역관리<br>화면2: 분개관리</div>
+          </div>
+          <div style="background:#f0fff0;border:2px solid #107c10;border-radius:8px;padding:14px">
+            <div style="font-size:20px">🔌</div>
+            <div style="font-weight:700;color:#1f4e79;margin-top:6px;font-size:12px">BAdI Z3000</div>
+            <div style="font-size:11px;color:#6a6d70;margin-top:4px">연결 모니터 연계<br>ACDOCC 전표생성</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:#89919a;font-size:11px;padding:20px 0;border-top:1px solid #e8e8e8;margin-top:10px">
+    SAP S/4HANA Group Reporting – 투자차액 관리 Fiori 와이어프레임 V1.0 | 설계 참고용 초안
+  </div>
+
+</div>
+</body>
+</html>
