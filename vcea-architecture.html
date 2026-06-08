@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Consolidated Entity Architecture — SAP Group Reporting</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #003366;
+  --navy-light: #E6EEF5;
+  --navy-mid: #B3CCE0;
+  --text: #1A1A2E;
+  --text-muted: #5A6475;
+  --text-light: #8C95A3;
+  --bg: #FFFFFF;
+  --bg-secondary: #F7F9FB;
+  --bg-tertiary: #EEF2F6;
+  --border: #D4DDE6;
+  --border-strong: #A8B8C8;
+  --success: #0A6640;
+  --success-bg: #E8F5EE;
+  --warning: #7A4F00;
+  --warning-bg: #FFF4E0;
+  --danger: #8B1A1A;
+  --danger-bg: #FDF0F0;
+  --purple: #3C3489;
+  --purple-bg: #EEEDFE;
+  --mono: 'JetBrains Mono', 'Noto Sans KR', monospace;
+  --serif: 'DM Serif Display', serif;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 커버 ── */
+.cover {
+  background: var(--navy);
+  color: white;
+  padding: 64px 80px 56px;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 320px; height: 320px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 40px;
+  width: 200px; height: 200px;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.cover-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.cover-title {
+  font-family: var(--serif);
+  font-size: 36px;
+  line-height: 1.2;
+  color: white;
+  margin-bottom: 12px;
+  max-width: 640px;
+}
+.cover-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 40px;
+  max-width: 560px;
+}
+.cover-meta {
+  display: flex;
+  gap: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+.cover-meta strong { color: rgba(255,255,255,0.8); font-weight: 500; display: block; margin-bottom: 2px; }
+
+/* ── 핵심 정의 박스 ── */
+.definition-box {
+  background: var(--navy);
+  color: white;
+  padding: 32px 40px;
+  margin: 0;
+  border-left: 4px solid rgba(255,255,255,0.3);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.definition-box .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.definition-box .text { color: rgba(255,255,255,0.9); }
+
+/* ── 섹션 레이아웃 ── */
+.page { padding: 48px 80px; }
+.page + .page { border-top: 1px solid var(--border); }
+.page-sm { padding: 36px 80px; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.page-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  max-width: 640px;
+}
+
+/* ── 카드 ── */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.card-navy { background: var(--navy-light); border-color: var(--navy-mid); }
+.card-success { background: var(--success-bg); border-color: #A3D4B8; }
+.card-warning { background: var(--warning-bg); border-color: #F0CFA0; }
+.card-danger { background: var(--danger-bg); border-color: #F0B8B8; }
+.card-purple { background: var(--purple-bg); border-color: #AFA9EC; }
+.card-gray { background: var(--bg-secondary); border-color: var(--border); }
+
+.card-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.card-title.navy { color: var(--navy); }
+.card-title.purple { color: var(--purple); }
+.card-title.success { color: var(--success); }
+.card-title.warning { color: var(--warning); }
+.card-title.danger { color: var(--danger); }
+
+/* ── 스텝 ── */
+.step-list { display: flex; flex-direction: column; gap: 16px; }
+.step-item { display: flex; gap: 16px; align-items: flex-start; }
+.step-num {
+  min-width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0; margin-top: 2px;
+}
+.step-num.navy { background: var(--navy); color: white; }
+.step-num.purple { background: var(--purple); color: white; }
+.step-num.warning { background: #D48A00; color: white; }
+.step-content { flex: 1; }
+.step-content strong { font-weight: 700; font-size: 13.5px; }
+.step-content .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.65; }
+
+/* ── 모노 코드 ── */
+.mono-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--navy);
+}
+.mono-block {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--text);
+  color: #E2E8F0;
+  padding: 16px 20px;
+  border-radius: 6px;
+  line-height: 1.9;
+  margin: 12px 0;
+}
+.mono-block .c-green { color: #68D391; }
+.mono-block .c-yellow { color: #F6E05E; }
+.mono-block .c-blue { color: #90CDF4; }
+.mono-block .c-gray { color: #A0AEC0; }
+.mono-block .c-red { color: #FC8181; }
+
+/* ── 배지 ── */
+.badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin: 1px 2px;
+  white-space: nowrap;
+}
+.badge-navy { background: var(--navy); color: white; }
+.badge-success { background: var(--success-bg); color: var(--success); border: 1px solid #A3D4B8; }
+.badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #F0CFA0; }
+.badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #F0B8B8; }
+.badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #AFA9EC; }
+.badge-neutral { background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* ── 플로우 ── */
+.flow {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin: 12px 0;
+}
+.flow-box {
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 11.5px; font-weight: 500;
+  white-space: nowrap; border: 1px solid;
+}
+.flow-navy { background: var(--navy-light); border-color: var(--navy-mid); color: var(--navy); }
+.flow-purple { background: var(--purple-bg); border-color: #AFA9EC; color: var(--purple); }
+.flow-success { background: var(--success-bg); border-color: #A3D4B8; color: var(--success); }
+.flow-warning { background: var(--warning-bg); border-color: #F0CFA0; color: var(--warning); }
+.flow-arrow { color: var(--text-light); font-size: 14px; }
+
+/* ── 테이블 ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.data-table th {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--text-muted); text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1.5px solid var(--border-strong);
+  background: var(--bg-secondary);
+}
+.data-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.55;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr.row-success td { background: var(--success-bg); }
+.data-table tr.row-warning td { background: var(--warning-bg); }
+.data-table tr.row-navy td { background: var(--navy-light); }
+
+/* ── 비교 그리드 ── */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 16px 0; }
+.compare-card {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.compare-card.track1 { border-color: var(--navy-mid); }
+.compare-card.track2 { border-color: #F0CFA0; }
+.compare-header {
+  padding: 14px 20px;
+  font-weight: 700; font-size: 13px;
+}
+.compare-header.track1 { background: var(--navy); color: white; }
+.compare-header.track2 { background: #D48A00; color: white; }
+.compare-body { padding: 16px 20px; }
+.compare-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 12.5px; gap: 12px;
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-row .label { color: var(--text-muted); flex-shrink: 0; }
+.compare-row .value { text-align: right; font-weight: 500; }
+
+/* ── 구분선 ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+.divider-strong { border: none; border-top: 2px solid var(--navy); margin: 0; }
+
+/* ── 각주 박스 ── */
+.insight-box {
+  background: var(--navy);
+  color: white;
+  padding: 24px 32px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+.insight-box .label {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ── 경고/운영 리스크 ── */
+.risk-box {
+  border-left: 4px solid #C53030;
+  background: var(--danger-bg);
+  padding: 16px 20px;
+  border-radius: 0 6px 6px 0;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.risk-box .risk-title {
+  font-weight: 700; color: var(--danger);
+  font-size: 13px; margin-bottom: 6px;
+}
+
+/* ── 탭 ── */
+.tab-nav {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 32px;
+}
+.tab-btn {
+  padding: 10px 24px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--sans);
+}
+.tab-btn:hover { color: var(--navy); }
+.tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 700; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── TOC 사이드 ── */
+.toc-inline {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.toc-pill {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.toc-pill.active {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+
+/* ── RAP 개발 스코프 ── */
+.dev-scope {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.dev-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+}
+.dev-item .icon {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--purple);
+  margin-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.dev-item .title { font-weight: 700; font-size: 12.5px; margin-bottom: 4px; }
+.dev-item .desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── 푸터 ── */
+.footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 24px 80px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--text-light);
+}
+
+@media print {
+  .tab-nav, .toc-pill { display: none; }
+  .tab-panel { display: block !important; }
+  .page { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── 커버 ── -->
+<div class="cover">
+  <div class="cover-label">SAP Group Reporting · Implementation Architecture</div>
+  <div class="cover-title">Virtual Consolidated Entity Architecture</div>
+  <div class="cover-sub">SAP Group Reporting 기반 순차연결 구현 방법론 — Consolidated Entity Transformation Approach</div>
+  <div class="cover-meta">
+    <div><strong>분류</strong>구현 아키텍처 (Implementation Architecture)</div>
+    <div><strong>대상</strong>SAP GR 컨설턴트 / 연결결산 담당자</div>
+    <div><strong>핵심 기술</strong>SAP GR · RAP/BTP · ACDOCU · PartnerSegment</div>
+  </div>
+</div>
+
+<div class="divider-strong"></div>
+
+<!-- ── 핵심 정의 ── -->
+<div class="definition-box">
+  <div class="label">설계 정의 (Design Definition)</div>
+  <div class="text">
+    본 설계는 중간 연결그룹을 하나의 <strong>가상 연결실체(Virtual Consolidated Entity)</strong>로 변환한 후, 해당 실체를 상위 연결의 연결단위로 사용하는 순차연결 모델이다.<br>
+    순차연결을 <em>데이터 복사 문제</em>로 보지 않고 <em>연결실체 변환(Consolidated Entity Transformation) 문제</em>로 재정의함으로써, SAP GR 표준 기능 범위 내에서 완전한 구현이 가능하다.
+  </div>
+</div>
+
+<!-- ── 메인 콘텐츠 ── -->
+<div class="page">
+  <div class="toc-inline">
+    <span class="toc-pill active" onclick="showSection('philosophy',this)">설계 철학</span>
+    <span class="toc-pill" onclick="showSection('track1',this)">트랙 1 — GR 내 순차연결</span>
+    <span class="toc-pill" onclick="showSection('track2',this)">트랙 2 — 외부 FS 업로드</span>
+    <span class="toc-pill" onclick="showSection('rap',this)">RAP 개발 상세</span>
+    <span class="toc-pill" onclick="showSection('operation',this)">운영 리스크</span>
+    <span class="toc-pill" onclick="showSection('compare',this)">비교 및 선택</span>
+  </div>
+
+  <!-- ========== 설계 철학 ========== -->
+  <div id="philosophy" class="tab-panel active">
+    <div class="page-title">설계 철학 — Consolidated Entity Transformation</div>
+    <div class="page-desc">기존 SAP 순차연결 접근과의 근본적 차이, 연결실체 가상화 개념, 연결조정 비승계 원칙</div>
+
+    <div class="section-label">기존 접근과의 차이</div>
+    <table class="data-table" style="margin-bottom:24px;">
+      <thead>
+        <tr><th>구분</th><th>기존 접근 (GRDC Data Mapping)</th><th>본 설계 (VCEA)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>문제 정의</td>
+          <td>다단계 구조를 GR에 억지로 집어넣는 방법</td>
+          <td>중간 연결 완료 후 단일 연결실체로 변환</td>
+        </tr>
+        <tr>
+          <td>상위 연결의 인식</td>
+          <td>S1·S2가 개별 CU로 존재하거나 치환 처리</td>
+          <td>CG_P에서는 S1·S2의 연결 결과가 M 연결실체에 흡수되어 표현됨</td>
+        </tr>
+        <tr>
+          <td>내부거래 처리</td>
+          <td>파트너 치환 · GRDC 매핑 필요</td>
+          <td>PartnerSegment + Reclass Rule + ICMR 표준 처리</td>
+        </tr>
+        <tr>
+          <td>연결조정 승계</td>
+          <td>하위 조정 분개가 상위로 누적</td>
+          <td><strong>연결조정 분개 비승계. 연결 결과만 입력 데이터로 사용</strong></td>
+        </tr>
+        <tr>
+          <td>추가 라이선스</td>
+          <td>GRDC 별도 라이선스 필요</td>
+          <td>표준 GR + RAP 개발만으로 구현</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-label">연결조정 비승계 원칙 — 핵심 차별점</div>
+    <div class="insight-box">
+      <div class="label">핵심 원칙 (Core Principle)</div>
+      본 설계는 <strong>연결조정 분개를 상위 연결으로 승계하지 않는다.</strong><br>
+      연결조정 결과가 반영된 연결재무제표만 상위 연결의 입력 데이터로 사용한다.<br><br>
+      즉, CG_M의 PL00(개별)·PL01~PL30(연결조정) 모든 레이어의 결과가 집약된 최종 잔액을 CG_P의 M Local FS(PL00)로 적재한다. 연결조정 분개 명세는 복사하지 않으며, 상위 연결은 M을 하나의 완결된 연결실체로 인식한다.
+    </div>
+
+    <div class="section-label">연결실체 가상화 구조</div>
+    <div class="mono-block">
+<span class="c-gray">── CG_M 처리 (Y10 Version) ──────────────────</span>
+  M + S1 + S2
+    <span class="c-blue">↓ 연결결산 수행 (ICMR · 연결조정)</span>
+  M 연결재무제표 생성
+    <span class="c-gray">(S1·S2 개별 데이터는 CG_M Y10에 완전 보존)</span>
+
+<span class="c-yellow">── Consolidated Entity Transformation ────────</span>
+  M 연결재무제표
+    <span class="c-green">↓ RAP API: 연결결과 → Local FS 재구성</span>
+  CG_P의 M Local FS (PL00)로 적재
+    <span class="c-gray">(PartnerSegment로 원천 법인 식별 보존)</span>
+
+<span class="c-gray">── CG_P 처리 (000 Version) ──────────────────</span>
+  P + M(가상화된 연결실체) + T
+    <span class="c-green">↓ Reclass → ICMR → 연결조정</span>
+  최종 연결재무제표
+    </div>
+
+    <div class="section-label">연결그룹 설계 원칙 — 반드시 2개</div>
+    <div class="card card-navy">
+      <div class="card-title navy">연결범위(Control Boundary)는 Ownership + Consolidation Group이 결정한다</div>
+      Y10/000은 Version이고, CG_M/CG_P는 연결그룹이다. 두 축은 독립적으로 존재하며 혼동하지 않는다.<br><br>
+      <strong>CG_M</strong> (중간 연결그룹): M, S1, S2<br>
+      <strong>CG_P</strong> (최종 연결그룹): P, M, T — S1·S2는 CG_M에서 완결되어 M에 흡수됨
+    </div>
+  </div>
+
+  <!-- ========== 트랙 1 ========== -->
+  <div id="track1" class="tab-panel">
+    <div class="page-title">트랙 1 — GR 내 순차연결</div>
+    <div class="page-desc">중간지배 그룹도 GR(CG_M)에서 연결결산을 완료한 후, RAP API가 연결 결과를 CG_P의 M Local FS로 자동 변환·적재</div>
+
+    <div class="card card-navy" style="margin-bottom:24px;">
+      <div class="card-title navy">적용 조건</div>
+      중간지배 그룹 전 법인이 GR CU로 등록 가능하고, GR에서 중간지배 연결결산을 수행할 수 있는 경우. 비SAP 법인 포함 시 AGRA 비SAP 온보딩으로 ACDOCU 직접 적재 후 동일 구조 적용 가능.
+    </div>
+
+    <div class="section-label">1단계 — CU 마스터 설정</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num navy">1</div>
+        <div class="step-content">
+          <strong>전체 법인 Full CU 등록</strong>
+          <div class="sub">P, M, S1, S2, T 모두 Full CU (CU Type: 01). CG_M 연결 대상: M·S1·S2. CG_P 연결 대상: P·M·T. S1·S2는 CG_M Ownership에만 포함. 비SAP 법인은 AGRA 온보딩 후 동일하게 Full CU 등록.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">2단계 — 연결그룹 설계 (2개 필수)</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num navy">1</div>
+        <div class="step-content">
+          <strong>CG_M — 중간 연결그룹</strong>
+          <div class="sub">구성: M, S1, S2. Ownership: M→S1(지분율), M→S2(지분율). 중간지배 연결결산이 완전히 수행되는 독립된 연결그룹. 연결범위(Control Boundary)를 명확히 정의.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num navy">2</div>
+        <div class="step-content">
+          <strong>CG_P — 최종 연결그룹</strong>
+          <div class="sub">구성: P, M, T. Ownership: P→M(지분율), P→T(지분율). S1·S2 미포함 — M이 가상화된 단일 연결실체로 참여. RAP 변환 데이터가 M Local FS로 적재된 상태에서 연결 실행.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">3단계 — Version 설계</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num navy">1</div>
+        <div class="step-content">
+          <strong>Y10 Version — CG_M 전용</strong>
+          <div class="sub">중간 연결그룹(CG_M) 연결결산 전용 Version. Data Monitor에서 M·S1·S2 마감 관리. 중간지배사 CFO 책임 범위. 완료 후 Lock.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num navy">2</div>
+        <div class="step-content">
+          <strong>000 Version — CG_P 전용</strong>
+          <div class="sub">최종 연결그룹(CG_P) 연결결산 Version. Y10 Lock + RAP 변환 완료 후 개방. P·M·T 대상. M은 RAP가 적재한 연결 FS(PL00) 기준으로 참여.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">4단계 — Reclassification Rule (CG_P 000)</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num navy">1</div>
+        <div class="step-content">
+          <strong>T의 RBUPTR 재분류 — FI 레이어 무간섭</strong>
+          <div class="sub">
+            Source: <span class="mono-tag">RBUNIT=T, RBUPTR=S1</span> → Target: <span class="mono-tag">RBUNIT=T, RBUPTR=M, PartnerSegment=S1</span><br>
+            Source: <span class="mono-tag">RBUNIT=T, RBUPTR=S2</span> → Target: <span class="mono-tag">RBUNIT=T, RBUPTR=M, PartnerSegment=S2</span><br>
+            ACDOCU 레이어에서만 작동. Substitution Rule·Field Status 변경 불필요.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">5단계 — ICMR 설정</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num navy">1</div>
+        <div class="step-content">
+          <strong>CG_M Y10 — 표준 매칭 키</strong>
+          <div class="sub">매칭 키: <span class="mono-tag">RBUPTR</span> + <span class="mono-tag">RACCT</span>. S1↔S2↔M 내부거래 표준 처리. PartnerSegment 불필요.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num navy">2</div>
+        <div class="step-content">
+          <strong>CG_P 000 — PartnerSegment 추가 매칭 키</strong>
+          <div class="sub">매칭 키: <span class="mono-tag">RBUPTR</span> + <span class="mono-tag">PartnerSegment</span> + <span class="mono-tag">RACCT</span>.<br>
+          M(RBUPTR=T, PartnerSegment=S1) ↔ T(RBUPTR=M, PartnerSegment=S1) 건별 매칭·상계.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">연결 실행 순서</div>
+    <div class="flow">
+      <div class="flow-box flow-navy">CG_M Y10: 데이터 수집</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-navy">CG_M ICMR</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-navy">CG_M 연결조정</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-navy">Y10 Lock</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-purple">RAP: 연결실체 변환 → 000 적재</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-success">CG_P 000: T 수집</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-success">Reclass</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-success">CG_P ICMR</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-success">CG_P 연결조정</div><div class="flow-arrow">→</div>
+      <div class="flow-box flow-success">최종 보고</div>
+    </div>
+  </div>
+
+  <!-- ========== 트랙 2 ========== -->
+  <div id="track2" class="tab-panel">
+    <div class="page-title">트랙 2 — 외부 FS 업로드</div>
+    <div class="page-desc">중간지배 그룹이 GR 외부에서 연결결산을 수행하고, 트랙 1의 RAP 변환 결과물과 동일한 구조로 CG_P에 업로드. GR 입장에서 두 트랙의 000 Version ACDOCU 구조는 완전히 동일.</div>
+
+    <div class="card card-warning" style="margin-bottom:24px;">
+      <div class="card-title warning">적용 조건</div>
+      중간지배 그룹이 GR 외부 시스템에서 연결결산을 수행하여 CU 등록이 불가능한 경우, 또는 법적·지배구조적 비공개 요건으로 GR 내 연결결산이 불가능한 경우.
+    </div>
+
+    <div class="section-label">1단계 — CU 마스터 설정</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num warning">1</div>
+        <div class="step-content">
+          <strong>M — Full CU</strong>
+          <div class="sub">CG_P 연결 대상. 연결 FS 업로드 주체. Data Monitor 마감 대상 포함.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num warning">2</div>
+        <div class="step-content">
+          <strong>S1·S2 — Partner Only CU (핵심)</strong>
+          <div class="sub"><span class="mono-tag">Partner Only</span> 옵션 지정. RBUPTR 값으로 인식 가능(ICMR 매칭 키 정상 작동). Data Monitor 마감 제외. 재무집계 제외. 실제 데이터 적재 불필요. GR 내 CG_M 연결그룹 불필요.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num warning">3</div>
+        <div class="step-content">
+          <strong>T — Full CU</strong>
+          <div class="sub">FI 원장 데이터 표준 수집. 원천 데이터 일절 변경 없음.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">2단계 — 연결그룹 설계 (CG_P 단일)</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num warning">1</div>
+        <div class="step-content">
+          <strong>CG_P 단일 — GR 내 CG_M 불필요</strong>
+          <div class="sub">중간 연결이 외부에서 수행되므로 GR 내 CG_M 불필요. CG_P: P, M, T. S1·S2는 Partner Only CU이므로 Ownership 미포함. 트랙 2에서는 연결그룹 1개.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">3단계 — M 업로드 데이터 설계</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num warning">1</div>
+        <div class="step-content">
+          <strong>트랙 1 RAP 결과물과 동일 구조 — 수동 작성</strong>
+          <div class="sub">
+            외부 파트너와의 거래: <span class="mono-tag">RBUNIT=M, RBUPTR=T, PartnerSegment=S1/S2</span> 행 분리 제출<br>
+            M 내부 상계 완료분: PartnerSegment 공란<br>
+            PL00 기준 최종 연결 잔액만 제출. 연결조정 분개 명세 불필요.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">4단계 이후 — 트랙 1 CG_P와 완전 동일</div>
+    <div class="card card-gray">Reclassification Rule, ICMR Matching Rule, 연결조정, 실행 순서 모두 트랙 1의 CG_P 처리와 동일. GR 설정을 공유하거나 동일하게 구성.</div>
+
+    <div class="section-label" style="margin-top:24px;">ACDOCU 데이터 흐름</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>단계</th><th>RBUNIT</th><th>RBUPTR</th><th>PartnerSegment</th><th>FS Item</th><th>금액</th><th>생성 주체</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-navy">
+          <td><span class="badge badge-navy">M 업로드</span></td>
+          <td><span class="mono-tag">M</span></td><td><span class="mono-tag">T</span></td><td><span class="mono-tag">S1</span></td><td><span class="mono-tag">AR</span></td><td>30</td><td>외부 업로드</td>
+        </tr>
+        <tr class="row-navy">
+          <td><span class="badge badge-navy">M 업로드</span></td>
+          <td><span class="mono-tag">M</span></td><td><span class="mono-tag">T</span></td><td><span class="mono-tag">S2</span></td><td><span class="mono-tag">AR</span></td><td>20</td><td>외부 업로드</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-neutral">T 원천</span></td>
+          <td><span class="mono-tag">T</span></td><td><span class="mono-tag">S1</span></td><td>—</td><td><span class="mono-tag">AP</span></td><td>(30)</td><td>T FI 원장</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-neutral">T 원천</span></td>
+          <td><span class="mono-tag">T</span></td><td><span class="mono-tag">S2</span></td><td>—</td><td><span class="mono-tag">AP</span></td><td>(20)</td><td>T FI 원장</td>
+        </tr>
+        <tr class="row-warning">
+          <td><span class="badge badge-warning">Reclass 후</span></td>
+          <td><span class="mono-tag">T</span></td><td><span class="mono-tag">M</span></td><td><span class="mono-tag">S1</span></td><td><span class="mono-tag">AP</span></td><td>(30)</td><td>Reclass Rule</td>
+        </tr>
+        <tr class="row-warning">
+          <td><span class="badge badge-warning">Reclass 후</span></td>
+          <td><span class="mono-tag">T</span></td><td><span class="mono-tag">M</span></td><td><span class="mono-tag">S2</span></td><td><span class="mono-tag">AP</span></td><td>(20)</td><td>Reclass Rule</td>
+        </tr>
+        <tr class="row-success">
+          <td><span class="badge badge-success">ICMR 상계</span></td>
+          <td colspan="4" style="color:var(--success);font-size:12px;">M(RBUPTR=T, PartnerSegment=S1/S2) ↔ T(RBUPTR=M, PartnerSegment=S1/S2) 건별 매칭·상계</td>
+          <td>0</td><td>ICMR 자동</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== RAP 개발 상세 ========== -->
+  <div id="rap" class="tab-panel">
+    <div class="page-title">RAP 개발 상세 — Consolidated Entity Transformation</div>
+    <div class="page-desc">트랙 1 전용. Y10 연결 결과를 CG_P M Local FS로 재구성하는 RAP/BTP 기반 변환 프로그램. 개발 규모: Medium.</div>
+
+    <div class="section-label">개발 범위 (5개 모듈)</div>
+    <div class="dev-scope">
+      <div class="dev-item">
+        <div class="icon">MODULE 01</div>
+        <div class="title">Y10 데이터 조회</div>
+        <div class="desc">CG_M Y10 Version ACDOCU에서 최종 연결 잔액 읽기. 모든 PL 집약 결과. ABAP CDS View 또는 OData API 활용.</div>
+      </div>
+      <div class="dev-item">
+        <div class="icon">MODULE 02</div>
+        <div class="title">연결실체 변환</div>
+        <div class="desc">S1·S2 개별 행을 M 연결 단위로 집약. 외부 파트너 거래 행 식별 및 분리. M 내부 상계 완료분 처리.</div>
+      </div>
+      <div class="dev-item">
+        <div class="icon">MODULE 03</div>
+        <div class="title">PartnerSegment 생성</div>
+        <div class="desc">RBUNIT=S1, RBUPTR=T 행 → RBUNIT=M, RBUPTR=T, PartnerSegment=S1 변환. 원천 법인 식별 보존.</div>
+      </div>
+      <div class="dev-item">
+        <div class="icon">MODULE 04</div>
+        <div class="title">ACDOCU 적재</div>
+        <div class="desc">GR 표준 데이터 수집 API 활용. 000 Version M Local FS(PL00) 적재. 비SAP 업로드 프로그램과 동일 인터페이스.</div>
+      </div>
+      <div class="dev-item">
+        <div class="icon">MODULE 05</div>
+        <div class="title">재실행 제어</div>
+        <div class="desc">멱등성 보장. 재실행 시 기존 적재 데이터 전체 삭제 후 재적재. Y10 Lock 이벤트 트리거 또는 수동 실행.</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px;">변환 로직 상세</div>
+    <div class="mono-block">
+<span class="c-gray">// INPUT: CG_M Y10 Version ACDOCU 최종 잔액</span>
+<span class="c-yellow">SELECT</span> RBUNIT, RBUPTR, RACCT, SEGMENT, ...
+<span class="c-yellow">FROM</span> ACDOCU
+<span class="c-yellow">WHERE</span> RLDNR = <span class="c-green">'Y10'</span> AND GJAHR = :year AND POPER = :period
+
+<span class="c-gray">// TRANSFORM: 연결실체 변환 로직</span>
+<span class="c-yellow">FOR EACH</span> row <span class="c-yellow">IN</span> source_data:
+
+  <span class="c-blue">IF</span> row.RBUNIT IN (S1, S2) AND row.RBUPTR IN CG_P_scope:
+    <span class="c-gray">// 외부 파트너 거래 → PartnerSegment 생성</span>
+    output.RBUNIT        = <span class="c-green">'M'</span>
+    output.RBUPTR        = row.RBUPTR        <span class="c-gray">// T 유지</span>
+    output.PARTNERSEGMENT = row.RBUNIT       <span class="c-gray">// S1 또는 S2</span>
+
+  <span class="c-blue">ELSE IF</span> row.RBUNIT IN (S1, S2) AND row.RBUPTR NOT IN CG_P_scope:
+    <span class="c-gray">// M 내부 거래 → 집약 (PartnerSegment 공란)</span>
+    output.RBUNIT        = <span class="c-green">'M'</span>
+    output.RBUPTR        = <span class="c-red">NULL</span>
+    output.PARTNERSEGMENT = <span class="c-red">NULL</span>
+
+<span class="c-gray">// OUTPUT: CG_P 000 Version M Local FS (PL00)</span>
+<span class="c-yellow">INSERT INTO</span> ACDOCU
+  (RLDNR=<span class="c-green">'000'</span>, RBUNIT=<span class="c-green">'M'</span>, POPER=:period, ...)
+    </div>
+
+    <div class="section-label" style="margin-top:8px;">개발 규모 평가</div>
+    <table class="data-table">
+      <thead><tr><th>항목</th><th>내용</th><th>난이도</th></tr></thead>
+      <tbody>
+        <tr><td>ACDOCU 조회</td><td>CDS View 또는 OData API 활용. GR 표준 범위 내</td><td><span class="badge badge-success">Low</span></td></tr>
+        <tr><td>변환 로직</td><td>RBUNIT·RBUPTR·PartnerSegment 매핑 규칙. CG_P 범위 법인 목록 기반</td><td><span class="badge badge-warning">Medium</span></td></tr>
+        <tr><td>PartnerSegment 생성</td><td>필드 매핑 단순. 연결그룹 범위 판단 로직 포함</td><td><span class="badge badge-success">Low</span></td></tr>
+        <tr><td>ACDOCU 적재</td><td>GR 표준 데이터 수집 API. AGRA 비SAP 온보딩과 동일 패턴</td><td><span class="badge badge-success">Low</span></td></tr>
+        <tr><td>재실행 제어</td><td>기존 데이터 식별·삭제 로직. Lock 상태 체크 포함</td><td><span class="badge badge-warning">Medium</span></td></tr>
+        <tr style="background:var(--navy-light);">
+          <td><strong>전체 개발 규모</strong></td>
+          <td>RAP Object 2~3개, CDS View 1~2개 수준</td>
+          <td><span class="badge badge-navy">Medium</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 운영 리스크 ========== -->
+  <div id="operation" class="tab-panel">
+    <div class="page-title">운영 리스크 및 대응 절차</div>
+    <div class="page-desc">실제 프로젝트 운영에서 발생하는 주요 리스크와 표준 대응 절차</div>
+
+    <div class="section-label">핵심 운영 리스크 1 — CG_M 재오픈</div>
+    <div class="risk-box">
+      <div class="risk-title">Y10 Lock 후 감사 수정 발견 시나리오</div>
+      Y10 Lock → RAP 실행 → 000 연결 진행 중 → CG_M 감사 수정 발견 → Y10 재오픈 필요<br><br>
+      이 시점에서 000 Version의 M Local FS(RAP 생성 데이터)는 이미 무효 상태가 됩니다.
+    </div>
+
+    <div class="card card-navy" style="margin-top:12px;">
+      <div class="card-title navy">표준 대응 절차</div>
+      <div class="flow" style="margin-top:8px;">
+        <div class="flow-box flow-warning">CG_M 재오픈 요청</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-warning">000 Version M 데이터 무효 처리</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-navy">CG_M 수정 반영</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-navy">Y10 재연결</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-navy">Y10 재 Lock</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-purple">RAP 재실행</div><div class="flow-arrow">→</div>
+        <div class="flow-box flow-success">000 연결 재개</div>
+      </div>
+      CG_M 재오픈 시 CG_P의 RAP 생성 데이터는 즉시 무효 처리 후 재생성한다. RAP 멱등성(재실행 시 기존 삭제 후 재적재) 보장으로 이 절차가 자동화됨.
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">핵심 운영 리스크 2 — PartnerSegment 누락</div>
+    <div class="risk-box">
+      <div class="risk-title">트랙 2 전용 — M 업로드 시 PartnerSegment 미기입</div>
+      M 담당자가 외부 파트너와의 거래를 PartnerSegment 없이 업로드할 경우, ICMR에서 M↔T 내부거래 미상계 잔액 발생.
+    </div>
+    <div class="card card-gray" style="margin-top:12px;">
+      <div class="card-title">대응 방안</div>
+      업로드 파일 검증 Rule 구축: PartnerSegment 공란인 행 중 RBUPTR이 CG_P 범위 법인인 경우 오류 처리. M 담당자 교육 및 업로드 템플릿 표준화. 트랙 1 전환 시 이 리스크 자체가 소멸.
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">운영 통제 체계</div>
+    <table class="data-table">
+      <thead><tr><th>통제 항목</th><th>트랙 1</th><th>트랙 2</th></tr></thead>
+      <tbody>
+        <tr><td>Y10/000 순서 제어</td><td>Version Lock 워크플로우 자동 제어</td><td>해당 없음 (단일 Version)</td></tr>
+        <tr><td>RAP 재실행 권한</td><td>연결 관리자 전용. 감사 로그 필수</td><td>해당 없음</td></tr>
+        <tr><td>M 데이터 검증</td><td>RAP 변환 시 자동 검증</td><td>업로드 전 파일 검증 Rule</td></tr>
+        <tr><td>CG_M 재오픈 승인</td><td>CFO 승인 + 000 데이터 무효화 절차 병행</td><td>해당 없음</td></tr>
+        <tr><td>ICMR 미상계 모니터링</td><td>Data Monitor 표준 기능</td><td>Data Monitor 표준 기능</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 비교 ========== -->
+  <div id="compare" class="tab-panel">
+    <div class="page-title">트랙 비교 및 선택 기준</div>
+    <div class="page-desc">두 트랙의 CG_P(000 Version) ACDOCU 구조는 완전히 동일. 차이는 데이터 입력 수단.</div>
+
+    <div class="compare-grid" style="margin-bottom:24px;">
+      <div class="compare-card track1">
+        <div class="compare-header track1">트랙 1 — GR 내 순차연결</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">연결그룹</span><span class="value">CG_M + CG_P (2개)</span></div>
+          <div class="compare-row"><span class="label">S1·S2 CU</span><span class="value"><span class="badge badge-navy">Full CU</span></span></div>
+          <div class="compare-row"><span class="label">Version</span><span class="value">Y10 + 000</span></div>
+          <div class="compare-row"><span class="label">중간 연결결산</span><span class="value">GR Y10(CG_M)</span></div>
+          <div class="compare-row"><span class="label">000 데이터 입력</span><span class="value"><span class="badge badge-purple">RAP 자동 변환</span></span></div>
+          <div class="compare-row"><span class="label">추가 개발</span><span class="value">RAP 프로그램 (Medium)</span></div>
+          <div class="compare-row"><span class="label">자동화</span><span class="value"><span class="badge badge-success">높음</span></span></div>
+          <div class="compare-row"><span class="label">S1·S2 원장 보존</span><span class="value">Y10에 완전 보존</span></div>
+        </div>
+      </div>
+      <div class="compare-card track2">
+        <div class="compare-header track2">트랙 2 — 외부 FS 업로드</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">연결그룹</span><span class="value">CG_P 단일 (1개)</span></div>
+          <div class="compare-row"><span class="label">S1·S2 CU</span><span class="value"><span class="badge badge-warning">Partner Only</span></span></div>
+          <div class="compare-row"><span class="label">Version</span><span class="value">000 단일</span></div>
+          <div class="compare-row"><span class="label">중간 연결결산</span><span class="value">GR 외부 시스템</span></div>
+          <div class="compare-row"><span class="label">000 데이터 입력</span><span class="value">외부 파일 수동 업로드</span></div>
+          <div class="compare-row"><span class="label">추가 개발</span><span class="value"><span class="badge badge-success">없음</span></span></div>
+          <div class="compare-row"><span class="label">자동화</span><span class="value"><span class="badge badge-warning">중간</span></span></div>
+          <div class="compare-row"><span class="label">S1·S2 원장 보존</span><span class="value">GR 미보존</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">CG_P 처리 — 양 트랙 공통</div>
+    <table class="data-table" style="margin-bottom:24px;">
+      <thead><tr><th>처리 항목</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>Reclass Rule</td><td>T의 RBUPTR=S1/S2 → RBUPTR=M, PartnerSegment=S1/S2 재분류</td></tr>
+        <tr><td>ICMR 매칭 키</td><td><span class="mono-tag">RBUPTR</span> + <span class="mono-tag">PartnerSegment</span> + <span class="mono-tag">RACCT</span></td></tr>
+        <tr><td>FI 레이어 개입</td><td>없음 — ACDOCU 레이어에서만 처리</td></tr>
+        <tr><td>GRDC</td><td>불필요</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-label">선택 기준</div>
+    <table class="data-table" style="margin-bottom:24px;">
+      <thead><tr><th>판단 기준</th><th>트랙 1 선택</th><th>트랙 2 선택</th></tr></thead>
+      <tbody>
+        <tr><td>중간지배 그룹 GR 사용 가능</td><td><span class="badge badge-navy">필수 전제</span></td><td><span class="badge badge-neutral">불필요</span></td></tr>
+        <tr><td>중간지배 연결 감사·공시</td><td><span class="badge badge-success">GR Y10 완전 대응</span></td><td><span class="badge badge-warning">외부 별도 대응</span></td></tr>
+        <tr><td>운영 자동화</td><td><span class="badge badge-success">높음</span></td><td><span class="badge badge-warning">중간</span></td></tr>
+        <tr><td>초기 구축 공수</td><td><span class="badge badge-warning">RAP 개발 추가</span></td><td><span class="badge badge-success">낮음</span></td></tr>
+        <tr><td>트랙 간 전환</td><td colspan="2">트랙 2→트랙 1: 중간지배 그룹 GR 도입 + RAP 개발. CG_P 처리 구조 무변경. 마이그레이션 리스크 최소.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-label">공통 설계 원칙</div>
+    <div class="card card-gray" style="line-height:1.9; font-size:13px;">
+      1. <strong>연결조정 비승계:</strong> 연결조정 분개를 상위 연결으로 승계하지 않는다. 연결조정 결과가 반영된 연결재무제표만 상위 연결의 입력 데이터로 사용한다.<br>
+      2. <strong>연결그룹 = 연결범위:</strong> Version과 연결그룹을 혼동하지 않는다. 연결범위(Control Boundary)는 Ownership + Consolidation Group이 결정한다.<br>
+      3. <strong>FI 레이어 무간섭:</strong> Substitution Rule·Field Status 변경 없이 ACDOCU 레이어에서만 처리한다.<br>
+      4. <strong>GRDC 불필요:</strong> 표준 GR 기능 + RAP 개발(트랙 1)만으로 구현 가능하다.<br>
+      5. <strong>PartnerSegment가 순차연결의 핵심 연결고리:</strong> ICMR 표준 매칭 키로 허용되므로 전체 설계가 표준 범위 내에서 성립한다.
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ── 푸터 ── -->
+<div class="footer">
+  <div>Virtual Consolidated Entity Architecture — SAP Group Reporting 기반 순차연결 구현 방법론</div>
+  <div>Consolidated Entity Transformation Approach · ASPN BAC Division</div>
+</div>
+
+<script>
+function showSection(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.toc-pill').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
