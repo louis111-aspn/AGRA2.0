@@ -812,6 +812,14 @@ body {
         </tr>
       </tbody>
     </table>
+
+    <div class="section-label" style="margin-top:24px;">SAP 로드맵 — 향후 표준 기능으로 대체 예정</div>
+    <div class="card card-warning">
+      <div class="card-title warning">Automatic Postings: Copy Transaction Data — Q4 2026 예정 (SAP S/4HANA Cloud Public Edition)</div>
+      SAP은 Q4 2026 릴리즈에서 Automatic Posting Rules에 다른 Source Version·Source Consolidation Unit 지정, 동적 Period/Year 오프셋, 환율 접근 Formula, 전용 Document Type 지정 옵션을 추가할 예정이다. 이 기능이 GA되면 위 개발 범위의 상당 부분이 표준 Rule 설정으로 대체 가능하다.<br><br>
+      <strong>핵심 확인 항목:</strong> PartnerSegment 자동 생성(SOURCE CU 코드 → PartnerSegment 필드 매핑)이 Formula 옵션 범위에 포함되는지 여부. 포함된다면 <strong>RAP 개발 없이 트랙 1 전체가 표준 GR 설정만으로 구현 가능</strong>해진다.<br><br>
+      <strong>현재 권고:</strong> Q4 2026 GA 시점에 스펙을 재검토하여 RAP 개발 범위를 재산정할 것.
+    </div>
   </div>
 
   <!-- ========== 운영 리스크 ========== -->
@@ -927,6 +935,28 @@ body {
       3. <strong>FI 레이어 무간섭:</strong> Substitution Rule·Field Status 변경 없이 ACDOCU 레이어에서만 처리한다.<br>
       4. <strong>GRDC 불필요:</strong> 표준 GR 기능 + RAP 개발(트랙 1)만으로 구현 가능하다.<br>
       5. <strong>PartnerSegment가 순차연결의 핵심 연결고리:</strong> ICMR 표준 매칭 키로 허용되므로 전체 설계가 표준 범위 내에서 성립한다.
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">SAP 로드맵 — 트랙 1 RAP 개발 대체 가능성</div>
+    <div class="card card-warning">
+      <div class="card-title warning">Automatic Postings: Copy Transaction Data — Q4 2026 예정 (SAP S/4HANA Cloud Public Edition)</div>
+      SAP 로드맵에 따르면 Q4 2026 릴리즈에서 Automatic Posting Rules에 Source Version·Source CU 지정, 동적 오프셋, 환율 Formula, Document Type 지정 옵션이 추가될 예정이다. 이 기능이 GA되면 현재 트랙 1의 RAP 개발(Medium) 상당 부분이 표준 기능으로 대체 가능해진다.
+    </div>
+    <table class="data-table" style="margin-bottom:16px;">
+      <thead><tr><th>RAP 개발 영역</th><th>로드맵 기능 대체 가능 여부</th></tr></thead>
+      <tbody>
+        <tr><td>Y10 최종 잔액 조회</td><td><span class="badge badge-success">가능</span> — Source Version = Y10 지정</td></tr>
+        <tr><td>Source CU 지정 (S1·S2 → M 집계)</td><td><span class="badge badge-success">가능</span> — Source Consolidation Unit 지정 옵션</td></tr>
+        <tr><td>PL00으로 000에 적재</td><td><span class="badge badge-success">가능</span> — Document Type 지정 옵션</td></tr>
+        <tr><td>멱등성 보장·재실행 제어</td><td><span class="badge badge-success">가능</span> — 표준 Task 재실행으로 대체</td></tr>
+        <tr><td>PartnerSegment 자동 생성</td><td><span class="badge badge-warning">GA 후 스펙 확인 필요</span> — Formula 옵션 범위에 따라 결정</td></tr>
+        <tr><td>CG_M 재오픈 자동 연동</td><td><span class="badge badge-warning">부분 가능</span> — 자동 트리거 여부 미지수</td></tr>
+        <tr class="row-navy"><td><strong>결론</strong></td><td>PartnerSegment 자동 생성이 Formula 범위에 포함되면 <strong>트랙 1 전체가 RAP 개발 없이 표준 GR 설정만으로 완전 구현 가능</strong>해진다. VCEA 아키텍처(CG_M/CG_P 분리, PartnerSegment + ICMR 조합)는 유지되며 실행 수단만 RAP → 표준 Rule로 교체됨.</td></tr>
+      </tbody>
+    </table>
+    <div class="insight-box">
+      <div class="label">액션 아이템 (Action Item)</div>
+      Q4 2026 GA 시점에 스펙을 재검토하고, RAP 개발 범위를 표준 기능 대체 가능 영역과 잔여 개발 영역으로 재산정할 것. PartnerSegment 자동 생성 포함 여부가 핵심 확인 항목이다.
     </div>
   </div>
 
