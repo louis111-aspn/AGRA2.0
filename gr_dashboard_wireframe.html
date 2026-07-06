@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>연결결산 통합 모니터링 와이어프레임</title>
+<style>
+  :root{
+    --navy:#003366;
+    --gray:#333333;
+    --line:#B9BEC4;
+    --bg:#FFFFFF;
+    --panel:#FAFAFA;
+    --gutter:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--gray);
+    font-family:'Noto Sans KR', -apple-system, sans-serif;
+    word-break:keep-all;
+    white-space:normal;
+  }
+  .mono{font-family:'JetBrains Mono','Noto Sans KR',monospace;}
+
+  /* ===== Page frame ===== */
+  .page{
+    max-width:1280px;
+    margin:0 auto;
+    padding:32px var(--gutter) 60px var(--gutter);
+  }
+
+  /* ===== Top bar ===== */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:2px solid var(--navy);
+    padding-bottom:14px;
+    margin-bottom:24px;
+  }
+  .topbar .brand{
+    font-size:13px;
+    letter-spacing:1px;
+    color:var(--navy);
+    font-weight:700;
+  }
+  .topbar .meta{
+    font-size:12px;
+    color:#7A7F85;
+  }
+
+  /* ===== Action Title block ===== */
+  .action-title-wrap{
+    border-left:4px solid var(--navy);
+    padding:4px 0 4px 16px;
+    margin-bottom:8px;
+  }
+  .eyebrow{
+    font-size:11px;
+    color:var(--navy);
+    font-weight:700;
+    letter-spacing:0.5px;
+    margin-bottom:4px;
+  }
+  .action-title{
+    font-size:22px;
+    font-weight:700;
+    color:var(--gray);
+    line-height:1.4;
+  }
+  .action-title .accent{color:var(--navy);}
+  .sub-note{
+    font-size:12px;
+    color:#7A7F85;
+    margin:8px 0 28px 20px;
+  }
+
+  /* ===== Section label ===== */
+  .section-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:10px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .section-label .idx{
+    font-size:11px;
+    background:var(--navy);
+    color:#fff;
+    padding:2px 6px;
+  }
+
+  /* ===== 2x2 MECE Grid ===== */
+  .grid-2x2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto;
+    gap:var(--gutter);
+    margin-bottom:32px;
+  }
+
+  .panel{
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:18px 18px 16px 18px;
+    display:flex;
+    flex-direction:column;
+    min-height:190px;
+  }
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .panel-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--gray);
+  }
+  .badge{
+    font-size:11px;
+    padding:2px 8px;
+    border:1px solid var(--navy);
+    color:var(--navy);
+    font-weight:700;
+  }
+  .badge.risk{border-color:#B3261E; color:#B3261E;}
+  .badge.ok{border-color:#1E6B3C; color:#1E6B3C;}
+
+  .row-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    flex:1;
+  }
+  .row-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:12.5px;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:6px;
+  }
+  .row-item:last-child{border-bottom:none;}
+  .row-left{display:flex; align-items:center; gap:8px;}
+  .row-val{font-weight:700;}
+  .row-val.mono{font-size:12px;}
+
+  .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:var(--gutter);
+    margin-bottom:32px;
+  }
+  .kpi{
+    border:1px solid var(--line);
+    padding:16px;
+    text-align:center;
+  }
+  .kpi .num{
+    font-size:26px;
+    font-weight:700;
+    color:var(--navy);
+    font-family:'JetBrains Mono','Noto Sans KR',monospace;
+  }
+  .kpi .label{
+    font-size:11.5px;
+    color:var(--gray);
+    margin-top:6px;
+  }
+
+  /* ===== Full width table panel ===== */
+  .panel-full{
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:18px;
+    margin-bottom:32px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  th{
+    text-align:left;
+    color:#fff;
+    background:var(--navy);
+    padding:8px 10px;
+    font-weight:700;
+    font-size:12px;
+  }
+  td{
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  tr:last-child td{border-bottom:none;}
+
+  .status-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .footer-note{
+    font-size:11px;
+    color:#9A9EA4;
+    text-align:right;
+    border-top:1px solid var(--line);
+    padding-top:10px;
+  }
+
+  .wf-tag{
+    position:absolute;
+    top:10px;
+    right:10px;
+    font-size:10px;
+    color:#9A9EA4;
+    border:1px dashed #C9CDD2;
+    padding:2px 6px;
+  }
+
+  /* ===== Tabs ===== */
+  .tabbar{
+    display:flex;
+    gap:0;
+    border-bottom:2px solid var(--navy);
+    margin-bottom:28px;
+  }
+  .tab-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:#7A7F85;
+    background:#FFFFFF;
+    border:1px solid var(--line);
+    border-bottom:none;
+    padding:10px 22px;
+    cursor:pointer;
+  }
+  .tab-btn + .tab-btn{border-left:none;}
+  .tab-btn.active{
+    color:#FFFFFF;
+    background:var(--navy);
+    border-color:var(--navy);
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ===== Emoji reference table ===== */
+  .ref-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:var(--gutter);
+  }
+  .ref-card{
+    border:1px solid var(--line);
+    background:var(--panel);
+  }
+  .ref-card .ref-head{
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    padding:10px 14px;
+  }
+  .ref-table{
+    width:100%;
+    border-collapse:collapse;
+  }
+  .ref-table th{
+    background:#EEF1F4;
+    color:var(--gray);
+    font-size:11.5px;
+    text-align:left;
+    padding:8px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .ref-table td{
+    font-size:12.5px;
+    padding:8px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .ref-table tr:last-child td{border-bottom:none;}
+  .emo-col{
+    font-size:15px;
+    width:44px;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div class="brand">ASPN GR ADD-IN · CONSOLIDATION CONTROL TOWER</div>
+    <div class="meta">2026 FY 12월 결산 · Wireframe v0.1</div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="tab-dashboard" onclick="switchTab('tab-dashboard', this)">01. 모니터링 대시보드</button>
+    <button class="tab-btn" data-tab="tab-emoji" onclick="switchTab('tab-emoji', this)">02. 이모지 참조표</button>
+  </div>
+
+  <div id="tab-dashboard" class="tab-panel active">
+
+  <div class="action-title-wrap">
+    <div class="eyebrow">TODAY'S CONCLUSION</div>
+    <div class="action-title">
+      ⚠️ 해외법인 2곳의 데이터 미수집으로 <span class="accent">D-3 마감 일정 지연 위험</span>이 존재하며,
+      ICMR 미매칭 14건에 대한 담당자 확인이 시급함
+    </div>
+  </div>
+  <div class="sub-note">본 화면은 픽셀 단위 확정 디자인이 아닌 정보 구조 검증용 와이어프레임임 · 아이콘 대신 이모지 세트 적용</div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="num">18/20</div>
+      <div class="label">📥 데이터 수집 완료 법인</div>
+    </div>
+    <div class="kpi">
+      <div class="num">96.2%</div>
+      <div class="label">🎯 ICMR 매칭률</div>
+    </div>
+    <div class="kpi">
+      <div class="num">7건</div>
+      <div class="label">📝 주석 작성 대기</div>
+    </div>
+    <div class="kpi">
+      <div class="num">D-3</div>
+      <div class="label">📅 마감까지 남은 일수</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1 : 4 MECE PANELS -->
+  <div class="section-label"><span class="idx">01</span> 업무 영역별 현황 (MECE)</div>
+  <div class="grid-2x2">
+
+    <!-- Panel A : 데이터 수집 -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">📥 Non-SAP 재무제표 수집</div>
+        <div class="badge risk">주의</div>
+      </div>
+      <div class="row-list">
+        <div class="row-item">
+          <div class="row-left">🏢 A법인 (중국)</div>
+          <div class="row-val">✅ 완료</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🌐 B법인 (베트남)</div>
+          <div class="row-val">🔄 진행중</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🌐 C법인 (인도)</div>
+          <div class="row-val">⛔ 미수집</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🔗 계정 매핑 검증</div>
+          <div class="row-val">⏳ 대기</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel B : 유불실현손익 -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">♻️ 미실현손익 제거 자동화</div>
+        <div class="badge ok">정상</div>
+      </div>
+      <div class="row-list">
+        <div class="row-item">
+          <div class="row-left">🧮 감가상각자산 재계산</div>
+          <div class="row-val">✅ 완료</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🧾 소거 전표 생성</div>
+          <div class="row-val">✅ 완료</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🔍 산식 검증 로그</div>
+          <div class="row-val mono">0 error</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">📈 전기 대비 증감</div>
+          <div class="row-val mono">+2.1%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel C : ICMR -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">🤝 ICMR 매칭 / 대사</div>
+        <div class="badge risk">확인필요</div>
+      </div>
+      <div class="row-list">
+        <div class="row-item">
+          <div class="row-left">🎯 자동 매칭</div>
+          <div class="row-val mono">1,240건</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">⚠️ 미매칭 (RBUPTR 상이)</div>
+          <div class="row-val mono">14건</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">❗ 담당자 확인 필요</div>
+          <div class="row-val">🔔 발송됨</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">💬 코멘트 등록</div>
+          <div class="row-val mono">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel D : 주석/리포팅 -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">📝 연결주석 관리</div>
+        <div class="badge ok">순조</div>
+      </div>
+      <div class="row-list">
+        <div class="row-item">
+          <div class="row-left">📚 템플릿 확정</div>
+          <div class="row-val">✅ 완료</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🗂️ 항목별 작성 현황</div>
+          <div class="row-val mono">21/28</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">🖨️ DART용 Excel 추출</div>
+          <div class="row-val">⏳ 대기</div>
+        </div>
+        <div class="row-item">
+          <div class="row-left">📮 최종 제출</div>
+          <div class="row-val">🔒 마감전</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 2 : DETAIL TABLE -->
+  <div class="section-label"><span class="idx">02</span> ICMR 미매칭 상세 (담당자 조치 대상)</div>
+  <div class="panel-full">
+    <table>
+      <thead>
+        <tr>
+          <th>👤 담당 법인</th>
+          <th>파트너 (RBUPTR)</th>
+          <th>계정 (RACCT)</th>
+          <th>차이 금액</th>
+          <th>상태</th>
+          <th>🕒 최종 처리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>B법인 (베트남)</td>
+          <td class="mono">1000 / 2000</td>
+          <td class="mono">108000</td>
+          <td class="mono">₩ 12,400,000</td>
+          <td><span class="status-tag">⚠️ 확인중</span></td>
+          <td class="mono">07-05 18:20</td>
+        </tr>
+        <tr>
+          <td>C법인 (인도)</td>
+          <td class="mono">1000 / 3000</td>
+          <td class="mono">259000</td>
+          <td class="mono">₩ 3,850,000</td>
+          <td><span class="status-tag">❗ 미확인</span></td>
+          <td class="mono">-</td>
+        </tr>
+        <tr>
+          <td>A법인 (중국)</td>
+          <td class="mono">2000 / 3000</td>
+          <td class="mono">108000</td>
+          <td class="mono">₩ 610,000</td>
+          <td><span class="status-tag">✅ 해소</span></td>
+          <td class="mono">07-04 09:10</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-note">ASPN Group Reporting Add-in · Wireframe for internal review · 실제 화면 구현 시 Fiori 표준 컴포넌트 기반 재작업 필요</div>
+
+  </div><!-- /tab-dashboard -->
+
+  <div id="tab-emoji" class="tab-panel">
+
+    <div class="action-title-wrap">
+      <div class="eyebrow">REFERENCE</div>
+      <div class="action-title">
+        아이콘 대체용 이모지는 <span class="accent">6개 업무 카테고리, 총 33종</span>으로 표준화하여
+        전 화면에 일관 적용함
+      </div>
+    </div>
+    <div class="sub-note">상태값(✅🔄⏳⛔)은 시맨틱 고정 세트로 최소한만 사용하고, 그 외 항목은 라벨 앞 1개씩만 배치함</div>
+
+    <div class="section-label"><span class="idx">01</span> 상태 · 데이터수집 · 검증/매칭</div>
+    <div class="ref-grid" style="margin-bottom:var(--gutter);">
+      <div class="ref-card">
+        <div class="ref-head">① 상태 / 진행 (Status &amp; Progress)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">✅</td><td class="mono">completed</td><td>완료 / 승인됨</td></tr>
+            <tr><td class="emo-col">🔄</td><td class="mono">in_progress</td><td>진행중 / 동기화 중</td></tr>
+            <tr><td class="emo-col">⏳</td><td class="mono">pending</td><td>대기 / 처리중</td></tr>
+            <tr><td class="emo-col">⛔</td><td class="mono">rejected</td><td>반려 / 중단</td></tr>
+            <tr><td class="emo-col">🔒</td><td class="mono">locked</td><td>마감 / 잠금</td></tr>
+            <tr><td class="emo-col">🔓</td><td class="mono">unlocked</td><td>마감 취소 / 재오픈</td></tr>
+            <tr><td class="emo-col">📌</td><td class="mono">pinned</td><td>고정 / 주요 항목 표시</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card">
+        <div class="ref-head">② 데이터 수집 (Non-SAP FS Collection)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">📥</td><td class="mono">upload</td><td>데이터 수집 / 업로드</td></tr>
+            <tr><td class="emo-col">📤</td><td class="mono">submit</td><td>데이터 제출 / 전송</td></tr>
+            <tr><td class="emo-col">📊</td><td class="mono">fs_data</td><td>재무제표 / 데이터 시트</td></tr>
+            <tr><td class="emo-col">🏢</td><td class="mono">entity</td><td>자회사 / 법인 단위</td></tr>
+            <tr><td class="emo-col">🌐</td><td class="mono">overseas</td><td>해외법인 / Non-SAP</td></tr>
+            <tr><td class="emo-col">🔗</td><td class="mono">mapping</td><td>연계 / 매핑</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ref-grid" style="margin-bottom:32px;">
+      <div class="ref-card">
+        <div class="ref-head">③ 검증 / 매칭 (Validation &amp; ICMR)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">🔍</td><td class="mono">review</td><td>검증 / 조회</td></tr>
+            <tr><td class="emo-col">⚠️</td><td class="mono">warning</td><td>경고 / 오류 가능성</td></tr>
+            <tr><td class="emo-col">❗</td><td class="mono">critical</td><td>필수 확인 / 중요 오류</td></tr>
+            <tr><td class="emo-col">🧮</td><td class="mono">auto_calc</td><td>산식 계산 / 자동계산</td></tr>
+            <tr><td class="emo-col">🤝</td><td class="mono">icmr_match</td><td>ICMR 매칭 (내부거래 대사)</td></tr>
+            <tr><td class="emo-col">♻️</td><td class="mono">elimination</td><td>소거 / 제거</td></tr>
+            <tr><td class="emo-col">🎯</td><td class="mono">accuracy</td><td>정확도 / 일치율</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card">
+        <div class="ref-head">④ 주석 / 리포팅 (Notes &amp; Reporting)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">📝</td><td class="mono">note_write</td><td>주석 작성</td></tr>
+            <tr><td class="emo-col">📄</td><td class="mono">report</td><td>리포트 / 문서</td></tr>
+            <tr><td class="emo-col">📚</td><td class="mono">templates</td><td>주석 템플릿 모음</td></tr>
+            <tr><td class="emo-col">📈</td><td class="mono">trend</td><td>추이 / 증감 분석</td></tr>
+            <tr><td class="emo-col">🗂️</td><td class="mono">classify</td><td>분류 / 항목 관리</td></tr>
+            <tr><td class="emo-col">📮</td><td class="mono">dart_submit</td><td>DART 제출 / 공시</td></tr>
+            <tr><td class="emo-col">🖨️</td><td class="mono">export</td><td>출력 / Excel 다운로드</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="idx">02</span> 알림/협업 · AI 검증 (V2.0)</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-head">⑤ 알림 / 협업 (Alerts &amp; Collaboration)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">🔔</td><td class="mono">notify</td><td>알림</td></tr>
+            <tr><td class="emo-col">👤</td><td class="mono">owner</td><td>담당자 / 사용자</td></tr>
+            <tr><td class="emo-col">💬</td><td class="mono">comment</td><td>코멘트 / 협의</td></tr>
+            <tr><td class="emo-col">📅</td><td class="mono">deadline</td><td>일정 / 마감기한</td></tr>
+            <tr><td class="emo-col">🕒</td><td class="mono">history</td><td>처리 시간 / 이력</td></tr>
+            <tr><td class="emo-col">🧾</td><td class="mono">journal</td><td>전표 / 저널 엔트리</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-card">
+        <div class="ref-head">⑥ AI 검증 (V2.0 관련)</div>
+        <table class="ref-table">
+          <thead><tr><th class="emo-col"></th><th>이모지</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td class="emo-col">🧠</td><td class="mono">ai_analysis</td><td>AI 분석 / AI 검증</td></tr>
+            <tr><td class="emo-col">🛡️</td><td class="mono">integrity</td><td>정합성 보증 / Guard Rail</td></tr>
+            <tr><td class="emo-col">📐</td><td class="mono">logic_check</td><td>논리 일관성 체크</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer-note">이모지 세트 v1.0 · 색상 강조는 이모지가 아닌 텍스트/배경(Navy)으로 처리 · 상태값 세트는 임의 추가 금지</div>
+
+  </div><!-- /tab-emoji -->
+
+</div>
+
+<script>
+  function switchTab(tabId, btn){
+    document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
