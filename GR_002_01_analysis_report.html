@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GR_002_01 프로젝트 종합 분석 보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003366;
+    --navy-light:#e8eef5;
+    --gray-dark:#333333;
+    --gray-mid:#6b6b6b;
+    --gray-line:#d9d9d9;
+    --gray-bg:#f6f6f6;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--white);color:var(--gray-dark);}
+  body{
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:15px;
+    line-height:1.7;
+    word-break:keep-all;
+    white-space:normal;
+  }
+  .mono{font-family:'JetBrains Mono','Noto Sans KR',monospace;}
+  .page{max-width:1040px;margin:0 auto;padding:0 48px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:var(--navy);
+    color:var(--white);
+    padding:96px 48px 72px;
+  }
+  .cover-inner{max-width:1040px;margin:0 auto;}
+  .cover-eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    letter-spacing:.08em;
+    color:#a9c2dd;
+    margin-bottom:20px;
+  }
+  .cover h1{
+    font-family:'DM Serif Display','Noto Sans KR',serif;
+    font-size:40px;
+    font-weight:400;
+    line-height:1.35;
+    max-width:820px;
+    word-break:keep-all;
+  }
+  .cover-sub{
+    margin-top:22px;
+    font-size:16px;
+    color:#cddaea;
+    max-width:760px;
+    word-break:keep-all;
+  }
+  .cover-meta{
+    margin-top:48px;
+    display:flex;
+    gap:56px;
+    border-top:1px solid rgba(255,255,255,.25);
+    padding-top:20px;
+  }
+  .cover-meta div{font-size:13px;color:#a9c2dd;}
+  .cover-meta strong{display:block;font-size:14px;color:var(--white);font-weight:500;margin-top:4px;}
+
+  /* ---------- Section frame ---------- */
+  section{padding:64px 0;border-bottom:1px solid var(--gray-line);}
+  section:last-of-type{border-bottom:none;}
+  .sec-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--navy);
+    font-weight:700;
+    margin-bottom:14px;
+  }
+  /* Action Title : 결론을 담은 완전한 문장 */
+  .action-title{
+    font-family:'DM Serif Display','Noto Sans KR',serif;
+    font-weight:400;
+    font-size:26px;
+    line-height:1.5;
+    color:var(--navy);
+    max-width:880px;
+    word-break:keep-all;
+    padding-bottom:28px;
+    border-bottom:2px solid var(--navy);
+    margin-bottom:32px;
+  }
+  h3.sub{
+    font-size:16px;
+    font-weight:700;
+    color:var(--navy);
+    margin:36px 0 14px;
+  }
+  p{margin-bottom:12px;color:var(--gray-dark);}
+  .lead{font-size:15.5px;color:var(--gray-dark);max-width:860px;}
+
+  /* ---------- Grid / cards ---------- */
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--gray-line);border:1px solid var(--gray-line);margin:24px 0;}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--gray-line);border:1px solid var(--gray-line);margin:24px 0;}
+  .cell{background:var(--white);padding:22px 20px;}
+  .cell .num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray-mid);margin-bottom:8px;}
+  .cell h4{font-size:14.5px;font-weight:700;color:var(--navy);margin-bottom:8px;word-break:keep-all;}
+  .cell p{font-size:13.5px;color:var(--gray-mid);margin-bottom:0;}
+
+  /* ---------- Table ---------- */
+  table{width:100%;border-collapse:collapse;margin:22px 0;font-size:13.5px;}
+  thead th{
+    background:var(--navy);color:var(--white);
+    text-align:left;padding:10px 14px;font-weight:500;
+    font-size:12.5px;letter-spacing:.02em;
+  }
+  tbody td{
+    padding:10px 14px;border-bottom:1px solid var(--gray-line);
+    vertical-align:top;color:var(--gray-dark);
+  }
+  tbody tr:nth-child(even){background:var(--gray-bg);}
+  td.path,td code{
+    font-family:'JetBrains Mono','Noto Sans KR',monospace;
+    font-size:12.5px;color:var(--navy);white-space:nowrap;
+  }
+  td.tag{white-space:nowrap;}
+  .tag-pill{
+    display:inline-block;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;padding:2px 8px;border:1px solid var(--navy);
+    color:var(--navy);border-radius:2px;
+  }
+
+  /* ---------- Folder tree ---------- */
+  .tree-wrap{
+    background:var(--navy);
+    color:#dfe8f2;
+    padding:28px 32px;
+    margin:24px 0;
+    overflow-x:auto;
+  }
+  .tree{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.9;white-space:pre;}
+  .tree .dir{color:#ffffff;font-weight:700;}
+  .tree .core{color:#7fb2e8;}
+  .tree .cfg{color:#a9c2dd;}
+  .tree .dead{color:#7d8ea3;text-decoration:line-through;}
+  .tree .comment{color:#6f88a3;}
+
+  /* ---------- Detail file cards ---------- */
+  .file-card{border:1px solid var(--gray-line);margin:22px 0;}
+  .file-head{
+    background:var(--navy-light);
+    padding:14px 20px;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--gray-line);
+  }
+  .file-head .fname{font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--navy);font-weight:700;}
+  .file-head .frole{font-size:12.5px;color:var(--gray-mid);}
+  .file-body{padding:20px;}
+  .file-body h5{font-size:13px;color:var(--navy);font-weight:700;margin:14px 0 6px;}
+  .file-body h5:first-child{margin-top:0;}
+  .file-body ul{margin-left:20px;margin-bottom:8px;}
+  .file-body li{font-size:13.5px;margin-bottom:5px;color:var(--gray-dark);}
+  code.inline{
+    font-family:'JetBrains Mono',monospace;background:var(--gray-bg);
+    padding:1px 5px;font-size:12px;color:var(--navy);
+  }
+  pre{
+    background:#1e2a38;color:#dfe8f2;padding:14px 18px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    overflow-x:auto;margin:10px 0;line-height:1.6;
+  }
+  .badge-risk{
+    display:inline-block;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;padding:2px 7px;background:#7a1f1f;color:#fff;margin-left:8px;
+  }
+  .badge-dead{
+    display:inline-block;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;padding:2px 7px;background:var(--gray-mid);color:#fff;margin-left:8px;
+  }
+
+  /* ---------- Insight callout ---------- */
+  .insight{
+    border-left:3px solid var(--navy);
+    background:var(--gray-bg);
+    padding:16px 22px;margin:20px 0;
+  }
+  .insight .k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--navy);font-weight:700;margin-bottom:6px;}
+  .insight p{font-size:13.5px;margin-bottom:0;}
+
+  footer{padding:36px 0 60px;}
+  footer p{font-size:12px;color:var(--gray-mid);}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow mono">GR_002_01 · PG_DC_0020_001</div>
+    <h1>Non-SAP 시산표 업로드 모듈은 클라이언트 엑셀 파싱과 RAP 배치 커밋을 결합해 GR 시스템 진입점 역할을 수행하는 구조로 설계되어 있음</h1>
+    <p class="cover-sub">SAP Fiori Freestyle(TypeScript) 기반 GR Add-in Module 1 소스 코드 분석 — 폴더 구조, 파일별 역할, 핵심 로직 및 리스크 정리</p>
+    <div class="cover-meta">
+      <div>REPOSITORY<strong>github.com/ASPN-GR/GR_002_01</strong></div>
+      <div>APP ID<strong>pgdc0020001 (ZPG_DC_0020_001)</strong></div>
+      <div>대상 서비스<strong>ZSB_GRVUPL (OData V2)</strong></div>
+      <div>분석 범위<strong>node_modules 제외 전체 소스</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ============ 0. Fiori 개발 아키텍처 기초 ============ -->
+  <section>
+    <div class="sec-label mono">01 · FIORI 개발 아키텍처 기초</div>
+    <div class="action-title">SAP Fiori 앱은 브라우저에서 실행되는 화면(SAPUI5)과 S/4HANA 내부의 데이터·로직(RAP Business Object)이 OData라는 표준 규격을 통해 완전히 분리되어 통신하는 구조이며, 본 프로젝트의 모든 파일은 이 4단 구조(화면 · 데이터 계약 · 백엔드 로직 · 실행 환경) 중 하나의 역할만을 담당함</div>
+
+    <p class="lead">소스 코드 분석에 들어가기 전, SAP Fiori 개발을 처음 접하는 경우를 가정해 프로젝트 전체를 관통하는 기본 개념을 먼저 정리합니다. 이 챕터의 용어와 계층 구조를 이해하면 이후 챕터의 파일별 설명이 "왜 그렇게 나뉘어 있는지"까지 자연스럽게 연결됩니다.</p>
+
+    <h3 class="sub">① SAP Fiori와 SAPUI5는 무엇인가</h3>
+    <p class="lead"><b>SAP Fiori</b>는 SAP가 제공하는 업무용 앱의 디자인 원칙이자 앱 모음의 이름이고, <b>SAPUI5(UI5)</b>는 그 디자인을 실제로 구현하는 자바스크립트 프레임워크입니다. 일반 웹 개발에 비유하면 React·Vue와 같은 위치에 있는 프레임워크로, 이 프로젝트의 <code class="inline">webapp/</code> 폴더 전체가 UI5로 작성된 하나의 "화면 앱(브라우저에서 실행되는 부분)"입니다. 화면 앱은 S/4HANA 시스템 자체가 아니라, S/4HANA가 노출한 데이터 창구(OData)에 접속하는 별도의 클라이언트 프로그램입니다.</p>
+
+    <h3 class="sub">② 화면 앱 내부 구조 — MVC 패턴</h3>
+    <p class="lead">UI5 앱은 예외 없이 아래 3가지 역할로 파일이 나뉩니다. 이 프로젝트의 <code class="inline">view/</code>, <code class="inline">controller/</code>, <code class="inline">model/</code> 폴더명이 그대로 이 역할을 의미합니다.</p>
+    <div class="grid-3">
+      <div class="cell">
+        <div class="num">VIEW</div>
+        <h4>화면 (.view.xml)</h4>
+        <p>버튼, 입력창, 테이블 등 사용자가 눈으로 보는 레이아웃만 XML로 선언. 로직은 포함하지 않음. 예: <code class="inline">Main.view.xml</code></p>
+      </div>
+      <div class="cell">
+        <div class="num">CONTROLLER</div>
+        <h4>로직 (.controller.ts)</h4>
+        <p>버튼 클릭·파일 선택 등 이벤트가 발생했을 때 실행되는 실제 코드. 예: <code class="inline">Main.controller.ts</code></p>
+      </div>
+      <div class="cell">
+        <div class="num">MODEL</div>
+        <h4>데이터 (JSONModel / ODataModel)</h4>
+        <p>화면과 로직이 공유하는 데이터 저장소. 화면 임시 상태용 JSONModel과, 서버 데이터용 ODataModel 두 종류가 함께 쓰임</p>
+      </div>
+    </div>
+    <p class="lead">View와 Controller는 <code class="inline">controllerName</code> 속성으로 1:1 연결되고, Model은 <code class="inline">setModel(모델, "이름")</code>으로 View에 이름표를 달아 바인딩됩니다. 이 프로젝트에서 <code class="inline">objectView</code>라는 이름의 JSONModel이 반복적으로 등장하는 이유가 여기에 있습니다 — 화면 전용 임시 데이터(업로드 파일명, 처리 중 여부, 결과 메시지 등)를 담는 그릇의 이름입니다.</p>
+
+    <h3 class="sub">③ 앱의 시작점 — Component와 manifest</h3>
+    <div class="grid-2">
+      <div class="cell">
+        <div class="num">Component.ts</div>
+        <h4>앱의 진입점(부트스트랩)</h4>
+        <p>브라우저가 앱을 켤 때 가장 먼저 실행되는 코드. "어떤 화면부터 보여줄지" 라우터를 초기화하는 역할만 수행 — 일반 웹 프레임워크의 <code class="inline">main.js</code>/<code class="inline">App.tsx</code>에 해당</p>
+      </div>
+      <div class="cell">
+        <div class="num">manifest.json</div>
+        <h4>앱의 설정 명세서</h4>
+        <p>이 앱이 어떤 데이터 서비스에 붙는지(dataSources), 화면이 몇 개고 어떤 순서로 전환되는지(routing), Fiori 홈 화면에 어떻게 등록되는지(crossNavigation)를 코드가 아닌 <b>선언적 설정</b>으로 기술</p>
+      </div>
+    </div>
+
+    <h3 class="sub">④ 화면과 서버를 잇는 통로 — OData</h3>
+    <p class="lead">이 화면 앱은 S/4HANA 데이터베이스에 직접 접속하지 않습니다. 대신 <b>OData</b>라는 REST 기반 표준 규격을 통해 서버와 통신합니다. OData는 "이 서비스에는 어떤 데이터 항목(Entity)이 있고, 어떤 함수(Function Import)를 호출할 수 있는지"를 <b>메타데이터</b>라는 계약서로 미리 정의해 둔 것이 특징입니다. 이 프로젝트의 <code class="inline">localService/metadata.xml</code>이 바로 그 계약서의 로컬 사본이며, 프런트엔드 코드는 이 계약서에 정의된 이름(<code class="inline">Bulk_Import_and_Update</code> 등)만 호출할 수 있고 그 내부 구현은 알지 못한 채로 동작합니다.</p>
+
+    <h3 class="sub">⑤ 서버 쪽 구조 — RAP와 클린 코어(Clean Core)</h3>
+    <p class="lead">OData 서비스 뒤편에서 실제 데이터 처리를 담당하는 것이 <b>RAP(RESTful ABAP Programming)</b>로 작성된 <b>Business Object(BO)</b>입니다. S/4HANA Public Cloud는 원칙적으로 SAP가 제공한 표준 프로그램(코어)을 고객이 직접 수정할 수 없습니다 — 이를 <b>클린 코어(Clean Core)</b> 원칙이라 부릅니다. 대신 RAP로 별도의 확장 프로그램(BO)을 새로 만들고, 이 BO를 OData로 노출해 화면 앱과 연결하는 방식으로 "코어를 건드리지 않고 기능을 추가"합니다. 이 프로젝트의 <code class="inline">ZSD_GRVUPL</code> BO가 바로 그 확장 프로그램이며, 메타데이터에 보이는 Draft 관련 엔티티(<code class="inline">I_DraftAdministrativeDataType</code> 등)는 RAP가 표준적으로 제공하는 "임시 저장(초안) 편집" 기능의 흔적입니다.</p>
+
+    <h3 class="sub">⑥ 화면 전환과 앱 간 이동 — 라우팅과 FLP</h3>
+    <p class="lead">한 앱 내부의 화면 전환은 <b>Router</b>가 담당하고(<code class="inline">manifest.json</code>의 <code class="inline">routing</code>에 정의), 서로 다른 앱 사이의 이동은 <b>Fiori Launchpad(FLP)</b>라는 SAP의 통합 포털이 담당합니다. 앱마다 <code class="inline">Semantic Object</code>와 <code class="inline">Action</code>이라는 두 개의 이름표가 붙는데, 이는 URL의 도메인/경로와 비슷한 개념으로 "이 앱을 무엇이라 부르고 어떤 동작인지"를 표시합니다. 이 프로젝트가 처리 완료 후 <code class="inline">PG_DC_0020</code>/<code class="inline">002</code>로 이동하는 것은, "PG_DC_0020이라는 이름의 다음 모듈 앱을 열어달라"고 FLP에 요청하는 것과 같습니다.</p>
+
+    <h3 class="sub">⑦ 개발 · 빌드 · 배포 파이프라인</h3>
+    <p class="lead">같은 소스 코드가 상황에 따라 다른 방식으로 실행됩니다. 개발 중에는 <code class="inline">ui5.yaml</code>이 실제 SAP 서버에 프록시로 연결해 실시간 확인을, <code class="inline">ui5-mock.yaml</code>은 가짜 데이터로 오프라인 개발을, 최종적으로 <code class="inline">ui5-deploy.yaml</code>은 완성된 코드를 SAP 서버 내부의 저장 공간(ABAP Repository, 흔히 BSP라 부름)으로 업로드합니다. TypeScript로 작성된 코드는 배포 전 UI5가 이해하는 JavaScript로 자동 변환(transpile)되는데, 이는 사람이 보기 편한 TS 문법과 브라우저가 실행하는 JS 문법을 분리하기 위함입니다.</p>
+
+    <h3 class="sub">전체 계층 구조 한눈에 보기</h3>
+    <svg width="100%" viewBox="0 0 944 480" style="margin:24px 0;">
+      <defs>
+        <marker id="arrowNavy" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#003366" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <!-- Layer 1: User / FLP -->
+      <rect x="20" y="20" width="904" height="70" rx="10" fill="#ffffff" stroke="#003366" stroke-width="1.2"/>
+      <text x="44" y="46" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#003366">LAYER 1 · 사용자 진입점</text>
+      <text x="44" y="68" font-family="Noto Sans KR, sans-serif" font-size="13" fill="#333333">Fiori Launchpad(FLP) — 여러 앱을 하나의 홈 화면에 모아 실행 · Semantic Object/Action으로 앱 간 이동 중계</text>
+
+      <line x1="472" y1="90" x2="472" y2="112" stroke="#6b6b6b" stroke-width="1.2" marker-end="url(#arrowNavy)"/>
+
+      <!-- Layer 2: UI5 App (this repo) -->
+      <rect x="20" y="112" width="904" height="130" rx="10" fill="#e8eef5" stroke="#003366" stroke-width="1.2"/>
+      <text x="44" y="136" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#003366">LAYER 2 · SAPUI5 화면 앱 — 본 프로젝트(GR_002_01)가 위치한 계층</text>
+      <rect x="44" y="150" width="270" height="72" rx="6" fill="#ffffff" stroke="#003366" stroke-width="0.8"/>
+      <text x="179" y="176" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="13" fill="#003366">View</text>
+      <text x="179" y="196" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="11.5" fill="#6b6b6b">Main.view.xml (화면 레이아웃)</text>
+      <rect x="337" y="150" width="270" height="72" rx="6" fill="#ffffff" stroke="#003366" stroke-width="0.8"/>
+      <text x="472" y="176" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="13" fill="#003366">Controller</text>
+      <text x="472" y="196" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="11.5" fill="#6b6b6b">Main.controller.ts (파싱·매핑·전송 로직)</text>
+      <rect x="630" y="150" width="270" height="72" rx="6" fill="#ffffff" stroke="#003366" stroke-width="0.8"/>
+      <text x="765" y="176" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="13" fill="#003366">Model</text>
+      <text x="765" y="196" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="11.5" fill="#6b6b6b">objectView(JSON) · mainService(OData)</text>
+
+      <line x1="472" y1="242" x2="472" y2="264" stroke="#6b6b6b" stroke-width="1.2" marker-end="url(#arrowNavy)"/>
+
+      <!-- Layer 3: OData contract -->
+      <rect x="20" y="264" width="904" height="70" rx="10" fill="#ffffff" stroke="#003366" stroke-width="1.2"/>
+      <text x="44" y="290" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#003366">LAYER 3 · OData 계약 (데이터 창구)</text>
+      <text x="44" y="312" font-family="Noto Sans KR, sans-serif" font-size="13" fill="#333333">ZSB_GRVUPL 서비스 · metadata.xml에 정의된 EntitySet/FunctionImport(Bulk_Import_and_Update)만 호출 가능</text>
+
+      <line x1="472" y1="334" x2="472" y2="356" stroke="#6b6b6b" stroke-width="1.2" marker-end="url(#arrowNavy)"/>
+
+      <!-- Layer 4: RAP BO -->
+      <rect x="20" y="356" width="904" height="70" rx="10" fill="#e8eef5" stroke="#003366" stroke-width="1.2"/>
+      <text x="44" y="382" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#003366">LAYER 4 · RAP Business Object (클린 코어 확장)</text>
+      <text x="44" y="404" font-family="Noto Sans KR, sans-serif" font-size="13" fill="#333333">ZSD_GRVUPL BO — S/4HANA 표준 코어를 수정하지 않고 별도로 추가된 처리 로직 · Draft 편집 인프라 포함</text>
+
+      <line x1="472" y1="426" x2="472" y2="448" stroke="#6b6b6b" stroke-width="1.2" marker-end="url(#arrowNavy)"/>
+
+      <text x="472" y="466" text-anchor="middle" font-family="Noto Sans KR, sans-serif" font-size="12" fill="#6b6b6b">S/4HANA Public Cloud 데이터베이스(ACDOCU 등)</text>
+    </svg>
+    <p class="lead" style="font-size:13px;color:var(--gray-mid);">※ 화살표는 데이터·요청이 흐르는 방향이며, 계층 사이의 경계(OData 계약)가 곧 "화면 개발팀과 백엔드 개발팀이 서로의 내부 구현을 몰라도 함께 개발할 수 있는" 분리 지점입니다.</p>
+
+    <h3 class="sub">핵심 용어 요약</h3>
+    <table>
+      <thead><tr><th style="width:20%">용어</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td class="path">SAPUI5 / Fiori</td><td>SAP 업무 앱을 만드는 자바스크립트 프레임워크(UI5)와 그 디자인 원칙(Fiori)</td></tr>
+        <tr><td class="path">MVC</td><td>View(화면)·Controller(로직)·Model(데이터) 3계층으로 코드를 분리하는 설계 패턴</td></tr>
+        <tr><td class="path">Component / manifest</td><td>앱의 진입점 코드(Component.ts)와 그 설정 명세서(manifest.json)</td></tr>
+        <tr><td class="path">OData</td><td>서버가 제공하는 데이터·기능을 표준 규격의 "계약서(메타데이터)"로 미리 정의해 노출하는 REST 기반 프로토콜</td></tr>
+        <tr><td class="path">RAP / Business Object</td><td>ABAP 언어로 서버 쪽 데이터·로직을 구현하는 최신 개발 모델. 결과물이 Business Object(BO)</td></tr>
+        <tr><td class="path">클린 코어(Clean Core)</td><td>SAP 표준 프로그램을 직접 고치지 않고, 별도 확장(RAP BO 등)으로만 기능을 추가하는 원칙</td></tr>
+        <tr><td class="path">FLP</td><td>Fiori Launchpad — 여러 앱을 하나의 홈 화면에 모아 실행하고 앱 간 이동을 중계하는 포털</td></tr>
+        <tr><td class="path">Semantic Object / Action</td><td>FLP에서 앱을 식별하고 다른 앱에서 호출하기 위한 이름표(예: PG_DC_0020 / 001)</td></tr>
+        <tr><td class="path">BSP / ABAP Repository</td><td>완성된 UI5 앱 코드가 최종적으로 업로드되는 S/4HANA 내부 저장 공간</td></tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <div class="k">이 챕터가 이후 분석에 갖는 의미</div>
+      <p>다음 챕터부터 다루는 모든 파일은 위 4개 계층(FLP → UI5 화면 앱 → OData 계약 → RAP BO) 중 정확히 하나의 역할만 수행합니다. 예를 들어 <code class="inline">Main.controller.ts</code>는 Layer 2(Controller), <code class="inline">metadata.xml</code>은 Layer 3(계약서 사본), <code class="inline">ui5-deploy.yaml</code>은 Layer 2 코드를 Layer 4 환경으로 옮기는 배포 파이프라인 설정입니다. 이 매핑을 기준으로 다음 챕터의 폴더 구조와 파일별 역할을 읽으면 이해가 훨씬 수월합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 1. 프로젝트 특징 및 아키텍처 개요 ============ -->
+  <section>
+    <div class="sec-label mono">02 · PROJECT OVERVIEW & ARCHITECTURE</div>
+    <div class="action-title">본 프로젝트는 SAP Fiori 표준 도구로 생성된 Freestyle 앱으로, 클린 코어 원칙에 따라 S/4HANA 코어를 수정하지 않고 별도 OData 서비스·RAP Unbound Action을 통해 Non-SAP 법인의 시산표 데이터를 GR 시스템에 반영함</div>
+
+    <p class="lead">2025년 3월 SAP Fiori Tools App Generator(Simple 템플릿)로 생성되었으며, TypeScript + UI5 1.130.7 조합으로 구축되었습니다. 백엔드는 RAP(RESTful ABAP Programming) 기반 Draft-enabled Business Object <code class="inline">ZSD_GRVUPL</code>이며, 프런트엔드는 이 BO를 노출하는 OData V2 서비스 <code class="inline">ZSB_GRVUPL</code>을 단일 데이터 소스로 사용합니다.</p>
+
+    <h3 class="sub">핵심 아키텍처 특징</h3>
+    <div class="grid-3">
+      <div class="cell">
+        <div class="num">01</div>
+        <h4>클라이언트 사이드 파싱</h4>
+        <p>SheetJS(XLSX)를 UI5 모듈로 지연 로딩하여 브라우저에서 직접 엑셀을 파싱. 서버 왕복 없이 즉시 검증·매핑 수행.</p>
+      </div>
+      <div class="cell">
+        <div class="num">02</div>
+        <h4>RAP Unbound Action 배치 커밋</h4>
+        <p><code class="inline">Bulk_Import_and_Update</code> Function Import를 행 단위로 호출 후 OData Batch로 일괄 <code class="inline">submitChanges()</code>.</p>
+      </div>
+      <div class="cell">
+        <div class="num">03</div>
+        <h4>FLP 체이닝 네비게이션</h4>
+        <p>처리 완료 후 Cross-Application Navigation으로 Semantic Object <code class="inline">PG_DC_0020</code> Action <code class="inline">002</code>(결과 확인 모듈)로 파라미터 전달.</p>
+      </div>
+    </div>
+
+    <h3 class="sub">개발 · 운영 환경 개요</h3>
+    <table>
+      <thead><tr><th style="width:20%">구분</th><th style="width:35%">설정 파일</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>로컬 개발</td><td class="path">ui5.yaml</td><td>fiori-tools-proxy로 <code class="inline">my407000-api.s4hana.cloud.sap</code>에 SAML(reentranceTicket) 연결. GR_002_02 webapp을 동일 서버에서 병행 서빙(모듈 간 네비게이션 테스트 목적)</td></tr>
+        <tr><td>로컬 정적 실행</td><td class="path">ui5-local.yaml</td><td>오프라인 정적 리소스 실행 구성</td></tr>
+        <tr><td>목업 실행</td><td class="path">ui5-mock.yaml</td><td>Mock 서버 기반 오프라인 개발/단위테스트용</td></tr>
+        <tr><td>배포</td><td class="path">ui5-deploy.yaml</td><td><code class="inline">deploy-to-abap</code> 태스크로 ABAP 리포지토리(BSP) 배포. 패키지 <code class="inline">YASGR</code>, 운송 <code class="inline">ZAMK900463</code>, 앱명 <code class="inline">ZPG_DC_0020_001</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2. 폴더 구조 시각적 설명 ============ -->
+  <section>
+    <div class="sec-label mono">03 · FOLDER STRUCTURE</div>
+    <div class="action-title">프로젝트는 SAP Fiori Tools 표준 레이아웃을 따르며, 실질 비즈니스 로직은 webapp/controller/Main.controller.ts 단일 파일(830줄)에 집중되어 있어 구조상 로직 응집도가 매우 높음</div>
+
+    <div class="tree-wrap">
+<div class="tree"><span class="dir">GR_002_01/</span>
+├── <span class="cfg">package.json</span>              <span class="comment"># npm 스크립트 · 앱 메타(pg_dc_0020_001)</span>
+├── <span class="cfg">tsconfig.json</span>             <span class="comment"># TS 컴파일 옵션 · 경로 별칭</span>
+├── <span class="cfg">ui5.yaml</span>                  <span class="comment"># 로컬 개발 미들웨어(프록시/리로드)</span>
+├── <span class="cfg">ui5-local.yaml</span> / <span class="cfg">ui5-mock.yaml</span>
+├── <span class="cfg">ui5-deploy.yaml</span>           <span class="comment"># ABAP 배포 태스크</span>
+├── <span class="cfg">.eslintrc</span> / <span class="cfg">.gitignore</span> / <span class="cfg">README.md</span>
+├── <span class="dir">.vscode/</span>
+│   └── launch.json               <span class="comment"># VSCode 디버그 설정</span>
+│
+└── <span class="dir">webapp/</span>
+    ├── <span class="core">Component.ts</span>            <span class="comment"># UIComponent 루트 · 라우터 초기화</span>
+    ├── <span class="core">manifest.json</span>           <span class="comment"># 앱 디스크립터(라우팅/OData/FLP)</span>
+    ├── index.html                    <span class="comment"># 스탠드얼론 부트스트랩</span>
+    │
+    ├── <span class="dir">controller/</span>
+    │   ├── App.controller.ts         <span class="comment"># 셸 컨트롤러(로직 없음)</span>
+    │   ├── <span class="core">Main.controller.ts</span>       <span class="comment"># ★ 핵심 로직 830줄</span>
+    │   └── TemplateDownloadScreen.controller.ts  <span class="dead">〈미완성/미사용 추정〉</span>
+    │
+    ├── <span class="dir">view/</span>
+    │   ├── App.view.xml
+    │   ├── <span class="core">Main.view.xml</span>            <span class="comment"># 업로드 화면 UI</span>
+    │   └── TemplateDownloadScreen.view.xml       <span class="dead">〈미완성/미사용 추정〉</span>
+    │
+    ├── <span class="dir">model/</span>
+    │   └── models.ts                  <span class="comment"># Device 모델 팩토리</span>
+    │
+    ├── <span class="dir">util/</span>
+    │   ├── Constants.js                <span class="dead">〈네임스페이스 불일치, dead code〉</span>
+    │   └── <span class="dir">sheetjs/</span>
+    │       ├── xlsx.full.min.js        <span class="comment"># 엑셀 파싱 라이브러리</span>
+    │       └── jszip.js
+    │
+    ├── <span class="dir">localService/</span>
+    │   ├── metadata.xml                <span class="comment"># OData V2 메타데이터 캐시(2,343줄)</span>
+    │   └── ZSB_GRVUPL_VAN.xml          <span class="comment"># UI 어노테이션 캐시</span>
+    │
+    ├── <span class="dir">i18n/</span>
+    │   ├── i18n.properties             <span class="comment"># 영문 리소스(기본)</span>
+    │   └── i18n_ko.properties          <span class="comment"># 한글 리소스</span>
+    │
+    ├── <span class="dir">css/</span>
+    │   └── style.css                   <span class="comment"># 경량 커스터마이징</span>
+    │
+    └── <span class="dir">test/</span>                     <span class="comment"># OPA5/QUnit 표준 스켈레톤(boilerplate)</span>
+        ├── unit/ · integration/
+        └── flpSandbox.html · testsuite.qunit.html
+</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="cell">
+        <div class="num">코드 응집 특징</div>
+        <h4>로직 집중형 구조</h4>
+        <p>전체 webapp 로직의 대부분이 <code class="inline">Main.controller.ts</code> 한 파일에 집중(파일 업로드 → 파싱 → 매핑 → 전송 → 네비게이션 전 과정). 나머지 컨트롤러/모델 파일은 매우 경량.</p>
+      </div>
+      <div class="cell">
+        <div class="num">스캐폴딩 잔재</div>
+        <h4>미사용 산출물 존재</h4>
+        <p><code class="inline">TemplateDownloadScreen</code> 관련 View/Controller, <code class="inline">util/Constants.js</code>는 초기 생성 시 다른 모듈에서 복사되었거나 미완성 상태로 남은 것으로 추정.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 파일별 역할 매트릭스 ============ -->
+  <section>
+    <div class="sec-label mono">04 · FILE ROLE MATRIX</div>
+    <div class="action-title">설정 파일은 개발·목업·배포 3개 프로파일로 명확히 분리되어 있고, webapp 내부는 MVC 표준 계층에 충실하되 실제 상태 관리는 컨트롤러 로컬 JSONModel(objectView)에 집중되어 있음</div>
+
+    <h3 class="sub">루트 설정 파일</h3>
+    <table>
+      <thead><tr><th style="width:22%">파일</th><th style="width:16%">역할</th><th>주요 내용</th></tr></thead>
+      <tbody>
+        <tr><td class="path">package.json</td><td class="tag"><span class="tag-pill">CONFIG</span></td><td>앱명 <code class="inline">pg_dc_0020_001</code>. start/build/deploy 스크립트. <code class="inline">prestart</code>/<code class="inline">prebuild</code>에서 <code class="inline">tsc --noEmit</code> 자동 실행</td></tr>
+        <tr><td class="path">tsconfig.json</td><td class="tag"><span class="tag-pill">CONFIG</span></td><td>ES2022 target/module, strict 모드. <code class="inline">pgdc0020001/*</code> → <code class="inline">./webapp/*</code> 경로 별칭</td></tr>
+        <tr><td class="path">ui5.yaml</td><td class="tag"><span class="tag-pill">DEV</span></td><td>fiori-tools-proxy(백엔드 연결) · fiori-tools-appreload(핫리로드) · ui5-tooling-transpile(TS→UI5 변환)</td></tr>
+        <tr><td class="path">ui5-local.yaml</td><td class="tag"><span class="tag-pill">DEV</span></td><td>정적 리소스만으로 로컬 구동</td></tr>
+        <tr><td class="path">ui5-mock.yaml</td><td class="tag"><span class="tag-pill">DEV</span></td><td>Mock 서버 미들웨어로 백엔드 없이 UI 개발/테스트</td></tr>
+        <tr><td class="path">ui5-deploy.yaml</td><td class="tag"><span class="tag-pill">DEPLOY</span></td><td>ABAP Repository 배포 대상(패키지/운송/앱명) 정의, test 폴더 배포 제외</td></tr>
+        <tr><td class="path">.eslintrc</td><td class="tag"><span class="tag-pill">CONFIG</span></td><td>SAP Fiori Tools ESLint 규칙 세트</td></tr>
+        <tr><td class="path">README.md</td><td class="tag"><span class="tag-pill">DOC</span></td><td>Fiori 생성기 메타 정보(생성일시, 템플릿, 서비스 URL)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub">webapp 핵심 파일</h3>
+    <table>
+      <thead><tr><th style="width:26%">파일</th><th style="width:16%">계층</th><th>역할</th></tr></thead>
+      <tbody>
+        <tr><td class="path">Component.ts</td><td class="tag"><span class="tag-pill">BOOTSTRAP</span></td><td>UIComponent 루트. Device 모델 등록 및 라우터 초기화만 수행하는 최소 구현</td></tr>
+        <tr><td class="path">manifest.json</td><td class="tag"><span class="tag-pill">DESCRIPTOR</span></td><td>dataSources(ZSB_GRVUPL) · routing(RouteMain/RouteTemplateDownload) · FLP 인바운드(PG_DC_0020-001) 정의</td></tr>
+        <tr><td class="path">controller/Main.controller.ts</td><td class="tag"><span class="tag-pill">★ CORE</span></td><td>파일 업로드·엑셀 파싱·필드 매핑·OData Batch 전송·결과 네비게이션 전체 담당(830줄)</td></tr>
+        <tr><td class="path">controller/App.controller.ts</td><td class="tag"><span class="tag-pill">SHELL</span></td><td>빈 onInit — 라우터 아웃렛 역할만</td></tr>
+        <tr><td class="path">controller/TemplateDownloadScreen.controller.ts</td><td class="tag"><span class="tag-pill">STUB</span></td><td>대부분 <code class="inline">MessageToast</code> 스텁 — 미완성 화면 추정</td></tr>
+        <tr><td class="path">view/Main.view.xml</td><td class="tag"><span class="tag-pill">VIEW</span></td><td>DynamicPage 기반 파일 업로드 UI(FileUploader, 실행/결과 MessageStrip)</td></tr>
+        <tr><td class="path">model/models.ts</td><td class="tag"><span class="tag-pill">MODEL</span></td><td>Device JSONModel 팩토리 함수 1개</td></tr>
+        <tr><td class="path">util/Constants.js</td><td class="tag"><span class="tag-pill">DEAD CODE</span></td><td>네임스페이스 <code class="inline">pp001</code> — 현재 앱과 불일치, 미참조</td></tr>
+        <tr><td class="path">util/sheetjs/*</td><td class="tag"><span class="tag-pill">LIBRARY</span></td><td>SheetJS 정적 번들 — UI5 requirejs 모듈로 지연 로딩</td></tr>
+        <tr><td class="path">localService/metadata.xml</td><td class="tag"><span class="tag-pill">CACHE</span></td><td>OData V2 메타데이터 로컬 캐시 — EntitySet 28개, Draft 지원 엔티티 포함</td></tr>
+        <tr><td class="path">i18n/i18n(_ko).properties</td><td class="tag"><span class="tag-pill">i18n</span></td><td>영/한 리소스 번들 — 메시지·라벨 전량 다국어화</td></tr>
+        <tr><td class="path">css/style.css</td><td class="tag"><span class="tag-pill">STYLE</span></td><td>패널 배경·폼 라벨 폭 등 경량 오버라이드 4줄</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 4. 파일별 세부 내역 ============ -->
+  <section>
+    <div class="sec-label mono">05 · FILE DETAIL</div>
+    <div class="action-title">Main.controller.ts는 엑셀 헤더 위치 독립적 매핑, RAP 필드 대소문자 컨벤션 변환, 행 단위 Promise 병렬 처리 후 단일 배치 커밋이라는 세 가지 설계 결정을 통해 템플릿 변경에 강건하면서도 트랜잭션 일관성을 확보함</div>
+
+    <!-- Main.controller.ts -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">webapp/controller/Main.controller.ts</span>
+        <span class="frole">830 lines · Core business logic</span>
+      </div>
+      <div class="file-body">
+        <h5>① onInit — 상태 모델 초기화</h5>
+        <p>화면 전용 JSONModel(<code class="inline">objectView</code>)을 생성해 <code class="inline">uploadedData / fileName / busy / resultMessage</code> 등을 관리. 동시에 <code class="inline">loadXLSX()</code>로 SheetJS를 미리 로딩해 사용자가 파일을 선택하는 시점의 지연을 최소화.</p>
+
+        <h5>② onFileChange — 엑셀 파싱 및 검증</h5>
+        <ul>
+          <li><code class="inline">FileReader.readAsBinaryString</code>로 파일을 읽고 XLSX.read()로 워크북 파싱</li>
+          <li>7번째 행(index 6)을 헤더, 8번째 행부터 데이터로 <b>고정 파싱</b> — 템플릿 레이아웃에 종속적</li>
+          <li>필수 헤더 <code class="inline">[RITCLG, RVERS, RYEAR, POPER, RBUNIT, ZRACCT]</code>를 <b>열 위치가 아닌 헤더명 매칭</b>으로 검증 → 컬럼 순서 변경에 안전</li>
+          <li>추가 필드 목록에 <code class="inline">PRBUPTR</code> 유지 — RBUPTR 리네이밍은 실제 전송 로직 구현이 이루어지지 않아 <b>의도적으로 원상복구</b>된 것으로 확인됨(정상 상태)</li>
+        </ul>
+        <pre>const expectedHeaders = ["RITCLG","RVERS","RYEAR","POPER","RBUNIT","ZRACCT"];
+const additionalFields = ["PRBUPTR","COICU","RUNIT","MSL","HSL", ...];
+// 주석: 파트너단위 필드명 변경 26.07.15(PRBUPTR -> RBUPTR) — 전송 로직 미구현으로 롤백, 현재 PRBUPTR 유지가 정상</pre>
+
+        <h5>③ mapDataForRapAction — RAP 필드 매핑</h5>
+        <ul>
+          <li>파싱 결과를 <code class="inline">UPL01 / UPL02 / UPL03</code> 3개 그룹으로 재구성(ZGRTUPL01/02/03 테이블 대응 추정)</li>
+          <li>필드명을 SAP 컨벤션(첫 글자만 대문자, 예 <code class="inline">RITCLG → Ritclg</code>)으로 일괄 변환</li>
+          <li>필수 키 필드(5종) 누락 행은 자동 스킵</li>
+        </ul>
+
+        <h5>④ uploadDataToBackend — 배치 전송</h5>
+        <ul>
+          <li>행 개수만큼 <code class="inline">Bulk_Import_and_Update</code> Function Import를 개별 <code class="inline">callFunction</code>으로 호출, 각각 Promise로 래핑</li>
+          <li><code class="inline">Promise.all()</code> 완료 후 <code class="inline">oModel.submitChanges()</code>로 단일 배치 커밋(<code class="inline">groupId: "$direct"</code> 지정으로 요청 구성)</li>
+          <li><code class="inline">isTestRun</code> 플래그를 <code class="inline">Istestrun</code> 파라미터로 전달 — 실반영/테스트 모드 분리</li>
+          <li>디버그용 <code class="inline">MessageBox.information("여기로 오나요?")</code> 잔존 <span class="badge-risk">CLEANUP 필요</span></li>
+        </ul>
+
+        <h5>⑤ navigateToResultView — FLP 체이닝</h5>
+        <p><code class="inline">sap.ushell.Container</code>의 <code class="inline">CrossApplicationNavigation</code> 서비스로 Semantic Object <code class="inline">PG_DC_0020</code> / Action <code class="inline">002</code>로 이동하며 <code class="inline">CnsldtnCOA·FSMapVer·FscalYr·PrvsPrd·CnsldtnUnit·ParentNode</code> 파라미터를 전달 — Module 1 → 다음 모듈로 이어지는 체인의 출발점.</p>
+
+        <h5>⑥ onDownloadPress — 템플릿 다운로드</h5>
+        <p>OData <code class="inline">UploadedTemplateEntity</code>를 하드코딩된 GUID로 조회해 Base64 첨부파일을 Blob 다운로드로 변환. <span class="badge-risk">RISK</span> 템플릿 파일이 재업로드되면 GUID가 바뀌어 다운로드가 깨질 수 있는 구조 — 설정화 또는 최신 버전 조회 로직 필요.</p>
+      </div>
+    </div>
+
+    <!-- manifest.json -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">webapp/manifest.json</span>
+        <span class="frole">App descriptor</span>
+      </div>
+      <div class="file-body">
+        <ul>
+          <li><b>dataSources</b>: <code class="inline">mainService</code>(ZSB_GRVUPL, OData V2, useBatch: true, TwoWay 바인딩) + 어노테이션 소스 <code class="inline">ZSB_GRVUPL_VAN</code></li>
+          <li><b>routing</b>: <code class="inline">RouteMain</code>(기본) / <code class="inline">RouteTemplateDownload</code>(스텁 화면) 2개 라우트</li>
+          <li><b>crossNavigation.inbounds</b>: <code class="inline">PG_DC_0020-001</code> — FLP에서 본 앱을 여는 진입점 등록</li>
+          <li><b>models</b>: 기본 모델(mainService, preload: true) + i18n 리소스 모델</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- view/Main.view.xml -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">webapp/view/Main.view.xml</span>
+        <span class="frole">106 lines · Upload screen UI</span>
+      </div>
+      <div class="file-body">
+        <ul>
+          <li><code class="inline">f:DynamicPage</code> 레이아웃 — 헤더에 템플릿 다운로드 버튼, 콘텐츠에 파일 업로드 패널</li>
+          <li><code class="inline">u:FileUploader</code>로 <code class="inline">.xlsx/.xls</code> 파일만 허용(MIME 타입 이중 검증)</li>
+          <li>Footer의 <code class="inline">MessageStrip</code>이 결과 메시지·타입(Success/Error/Information)을 바인딩 표시하고, 성공 시 결과 확인 링크 노출</li>
+          <li>기술적 설정 패널(테스트 실행 체크박스)은 <b>주석 처리되어 비활성 상태</b> — 향후 확장 지점으로 추정</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- localService/metadata.xml -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">webapp/localService/metadata.xml</span>
+        <span class="frole">2,343 lines · OData V2 metadata cache</span>
+      </div>
+      <div class="file-body">
+        <ul>
+          <li>EntitySet 28개 — 핵심은 <code class="inline">GRVUPL01/02/03Type</code>(업로드 대상), <code class="inline">RprtdCnsldEntityType</code>(반영 결과), <code class="inline">FsItemMappingEntityType</code></li>
+          <li>Draft 지원 엔티티(<code class="inline">I_DraftAdministrativeDataType</code> 등) 포함 — RAP BO가 Draft 편집 모델로 설계됨을 시사</li>
+          <li>FunctionImport: <code class="inline">Bulk_Import_and_Update</code>(Unbound, 프런트에서 실제 사용), <code class="inline">GRVUPL03Activate/Edit/Discard/Prepare/Resume</code>(Draft 표준 액션, 현재 프런트 미사용)</li>
+          <li>첨부파일 처리용 <code class="inline">UploadedTemplateEntity</code> 존재(FileName/MimeType/Attachment) — 템플릿 다운로드 기능의 데이터 소스</li>
+        </ul>
+        <div class="insight">
+          <div class="k">INSIGHT</div>
+          <p>메타데이터상 Draft 표준 액션(Activate/Edit/Prepare 등)이 다수 정의되어 있으나 프런트엔드는 이를 전혀 사용하지 않고 Unbound Function <code class="inline">Bulk_Import_and_Update</code> 하나로 전량 처리합니다. 이는 RAP BO 설계(Draft 지원)와 실제 UI 사용 패턴(Draft 미사용, 일괄 커밋) 사이에 괴리가 있다는 의미로, BO 측에 불필요하게 넓은 Draft 인프라가 유지되고 있을 가능성이 있습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ui5.yaml / deploy -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">ui5.yaml · ui5-deploy.yaml</span>
+        <span class="frole">Dev / deploy pipeline</span>
+      </div>
+      <div class="file-body">
+        <ul>
+          <li><code class="inline">ui5.yaml</code>: <code class="inline">fiori-tools-servestatic</code>로 <b>GR_002_02(다음 모듈)의 webapp을 동일 로컬 서버에서 병행 서빙</b> — Module 1→2 FLP 네비게이션을 로컬에서 통합 테스트하기 위한 구성으로 해석됨</li>
+          <li><code class="inline">ui5-deploy.yaml</code>: <code class="inline">deploy-to-abap</code> 커스텀 태스크가 <code class="inline">my407000.s4hana.cloud.sap</code>에 앱명 <code class="inline">ZPG_DC_0020_001</code>로 배포, 패키지 <code class="inline">YASGR</code>·운송 <code class="inline">ZAMK900463</code> 고정</li>
+          <li><code class="inline">/test/</code>, <code class="inline">/localService/</code>는 빌드/배포 시 제외 — 운영 번들 경량화</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- util/Constants.js -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">webapp/util/Constants.js <span class="badge-dead">DEAD CODE</span></span>
+        <span class="frole">17 lines</span>
+      </div>
+      <div class="file-body">
+        <pre>var constants = Object.freeze({
+    MainSmartTableId : "pp001.worklist.smarttable",
+    MainPage : 'pp001.MainPage',
+    ...
+});</pre>
+        <p>네임스페이스가 <code class="inline">pp001</code>로, 현재 앱의 실제 네임스페이스인 <code class="inline">pgdc0020001</code>과 불일치합니다. 코드베이스 전체에서 이 파일을 import/require하는 곳이 없어 <b>다른 모듈에서 복사되어 온 미참조 잔재 파일</b>로 판단됩니다.</p>
+      </div>
+    </div>
+
+    <!-- TemplateDownloadScreen -->
+    <div class="file-card">
+      <div class="file-head">
+        <span class="fname">TemplateDownloadScreen.controller.ts / .view.xml <span class="badge-dead">STUB</span></span>
+        <span class="frole">103 + 89 lines</span>
+      </div>
+      <div class="file-body">
+        <p><code class="inline">RouteTemplateDownload</code>로 라우팅은 등록되어 있으나, 실제 진입 트리거가 확인되지 않고 <code class="inline">onButtonExecutePress</code> 등 대부분의 핸들러가 <code class="inline">MessageToast.show()</code> 스텁 상태입니다. 반면 <code class="inline">Main.view.xml</code>의 "템플릿 다운로드" 버튼은 별도로 <code class="inline">Main.controller.ts</code>의 <code class="inline">onDownloadPress</code>를 호출합니다 — <b>동일한 기능명으로 서로 다른 두 개의 미완성/완성 구현이 공존</b>하는 상태로, 운영 반영 전 정리가 필요합니다.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ 종합 인사이트 ============ -->
+  <section>
+    <div class="sec-label mono">06 · KEY TAKEAWAYS</div>
+    <div class="action-title">운영 전환 전 필드 리네이밍 완결성, 미사용 스캐폴딩 정리, 디버그 코드 제거 3가지를 우선 점검하면 코드 품질 리스크를 실질적으로 낮출 수 있음</div>
+
+    <table>
+      <thead><tr><th style="width:6%">#</th><th style="width:22%">항목</th><th>내용 및 조치 방향</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>RBUPTR 리네이밍 롤백(정상)</td><td>커밋 메시지에는 RBUPTR 반영으로 기록되어 있으나, 실제로는 전송 로직 구현이 이루어지지 않아 <code class="inline">PRBUPTR</code>로 의도적으로 원상복구된 상태. 코드는 정상이며, 커밋 메시지와 실제 반영 범위가 달라 향후 이력 추적 시 혼선의 소지가 있으므로 커밋 설명 보완을 권장</td></tr>
+        <tr><td>2</td><td>미완성 화면 공존</td><td>TemplateDownloadScreen 관련 View/Controller가 스텁 상태로 라우팅에만 등록되어 있음. 완성하거나 라우트·번들에서 제거하는 결정 필요</td></tr>
+        <tr><td>3</td><td>하드코딩 템플릿 GUID</td><td>템플릿 다운로드 로직의 <code class="inline">templateId</code>가 소스에 고정값으로 박혀 있어 템플릿 갱신 시 다운로드가 깨질 수 있음</td></tr>
+        <tr><td>4</td><td>디버그 잔재</td><td><code class="inline">MessageBox.information("여기로 오나요?")</code> 등 개발 중 확인용 코드가 운영 코드에 잔존 — 클린업 필요</td></tr>
+        <tr><td>5</td><td>대량 데이터 처리 구조</td><td>행 수만큼 개별 <code class="inline">callFunction</code> Promise를 생성 후 단일 배치 커밋하는 구조로, 수백~수천 행 규모에서는 청크 분할 전송 여부 검토 권장</td></tr>
+        <tr><td>6</td><td>Draft 인프라와 실사용 패턴의 괴리</td><td>메타데이터상 Draft 표준 액션이 다수 정의되어 있으나 프런트는 Unbound Function 하나로 전량 처리 — BO 설계와 UI 사용 패턴 정합성 재검토 여지</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>본 보고서는 업로드된 GR_002_01 소스 코드(node_modules 제외)를 기준으로 정적 분석한 결과입니다. 백엔드 RAP BO의 실제 구현(ABAP 소스)은 포함되어 있지 않아, 프런트엔드에서 관찰되는 인터페이스 계약(OData 메타데이터, Function Import 시그니처)을 근거로 추정한 내용을 포함합니다.</p>
+  </footer>
+
+</div>
+</body>
+</html>
